@@ -1,4 +1,4 @@
-package edu.ucne.registrotecnicoap2.ui.theme
+package edu.ucne.registrotecnico.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

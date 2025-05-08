@@ -1,6 +1,5 @@
-package edu.ucne.registrotecnicoap2.ui.theme
+package edu.ucne.registrotecnico.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

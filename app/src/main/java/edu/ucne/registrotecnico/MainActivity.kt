@@ -1,4 +1,4 @@
-package edu.ucne.registrotecnicoap2
+package edu.ucne.registrotecnico
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import edu.ucne.registrotecnicoap2.ui.theme.RegistroTecnicoAp2Theme
+import edu.ucne.registrotecnico.ui.theme.RegistroTecnicoAp2Theme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

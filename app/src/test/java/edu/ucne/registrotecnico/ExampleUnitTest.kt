@@ -1,4 +1,4 @@
-package edu.ucne.registrotecnicoap2
+package edu.ucne.registrotecnico
 
 import org.junit.Test
 
