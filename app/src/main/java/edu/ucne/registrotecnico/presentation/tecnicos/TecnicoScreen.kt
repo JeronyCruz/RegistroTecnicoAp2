@@ -42,7 +42,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import edu.ucne.registrotecnico.data.local.database.TecnicoDb
 import edu.ucne.registrotecnico.data.local.entities.TecnicoEntity
-import edu.ucne.registrotecnico.saveTecnico
 import kotlinx.coroutines.launch
 
 @Composable
@@ -198,6 +197,8 @@ fun TecnicoScreen(
                                 sueldo = 0.0
                                 errorMessage = null
                                 editingTecnico = null
+
+                                navController.navigateUp()
                             },
                             modifier = Modifier
                                 .padding(4.dp),
