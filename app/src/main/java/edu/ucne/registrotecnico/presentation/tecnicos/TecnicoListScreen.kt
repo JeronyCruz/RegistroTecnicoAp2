@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
@@ -42,35 +44,48 @@ fun TecnicoListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Lista de técnicos") })
+                title = { Text("Lista de Técnicos") }
+            )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { onEditClick(0) }) {
-                Icon(Icons.Filled.Add, "Agregar nueva")
+                Icon(Icons.Filled.Add, "Agregar nuevo técnico")
             }
         }
     ) { padding ->
-        Column(modifier = modifier.padding(padding)) {
-
-            LazyColumn(
+        Column(
+            modifier = modifier
+                .padding(padding)
+                .fillMaxWidth()
+        ) {
+            // Card contenedor gris
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
-                    .padding(8.dp)
+                    .padding(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.LightGray.copy(alpha = 0.2f)
+                ),
+                shape = RoundedCornerShape(8.dp)
             ) {
-                items(tecnicoList) { tecnico ->
-                    TecnicoCard(
-                        tecnico = tecnico,
-                        onEditClick = { onEditClick(tecnico.tecnicoId) },
-                        onDeleteClick = { onDeleteClick(tecnico) }
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    items(tecnicoList) { tecnico ->
+                        TecnicoCard(
+                            tecnico = tecnico,
+                            onEditClick = { onEditClick(tecnico.tecnicoId) },
+                            onDeleteClick = { onDeleteClick(tecnico) }
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
                 }
             }
         }
     }
 }
-
 
 @Composable
 fun TecnicoCard(
@@ -82,7 +97,10 @@ fun TecnicoCard(
         elevation = CardDefaults.cardElevation(4.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp)
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Row(
             modifier = Modifier
@@ -93,7 +111,8 @@ fun TecnicoCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "ID: ${tecnico.tecnicoId}",
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray
                 )
                 Text(
                     text = tecnico.nombre,
@@ -101,18 +120,29 @@ fun TecnicoCard(
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
+
             Text(
                 text = "$${"%.2f".format(tecnico.sueldo)}",
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.primary
             )
 
+            Spacer(modifier = Modifier.width(8.dp))
+
             IconButton(onClick = onEditClick) {
-                Icon(Icons.Outlined.Edit, contentDescription = "Editar", tint = Color.Green)
+                Icon(
+                    Icons.Outlined.Edit,
+                    contentDescription = "Editar",
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
 
             IconButton(onClick = onDeleteClick) {
-                Icon(Icons.Outlined.Delete, contentDescription = "Eliminar", tint = Color.Green)
+                Icon(
+                    Icons.Outlined.Delete,
+                    contentDescription = "Eliminar",
+                    tint = MaterialTheme.colorScheme.error
+                )
             }
         }
     }
@@ -124,15 +154,21 @@ private fun Preview() {
     val tecnicos = listOf(
         TecnicoEntity(
             tecnicoId = 1,
-            nombre = "Juan",
-            sueldo = 100.0
+            nombre = "Juan Pérez",
+            sueldo = 1250.50
         ),
         TecnicoEntity(
             tecnicoId = 2,
-            nombre = "Jose",
-            sueldo = 200.0
+            nombre = "María García",
+            sueldo = 1450.75
+        ),
+        TecnicoEntity(
+            tecnicoId = 3,
+            nombre = "Carlos López",
+            sueldo = 1100.00
         )
     )
+
     RegistroTecnicoAp2Theme {
         TecnicoListScreen(
             tecnicoList = tecnicos,
