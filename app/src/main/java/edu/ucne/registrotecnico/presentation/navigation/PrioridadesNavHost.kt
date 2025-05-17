@@ -26,7 +26,7 @@ fun PrioridadesNavHost(
             PrioridadListScreen(
                 prioridadList = prioridadList,
                 onEditClick = { prioridadId ->
-                    navHostController.navigate(Screen.Tecnico(prioridadId))
+                    navHostController.navigate(Screen.Prioridad(prioridadId))
                 },
                 onDeleteClick = { prioridad ->
                     viewModel.deletePrioridad(prioridad)
