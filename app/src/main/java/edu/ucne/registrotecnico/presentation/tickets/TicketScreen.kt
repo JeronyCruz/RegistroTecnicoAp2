@@ -54,21 +54,18 @@ fun TicketScreen(
     navController: NavController,
     function: () -> Unit
 ) {
-
     var asunto by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
     var cliente by remember { mutableStateOf("") }
     var fecha by remember { mutableStateOf(Date()) }
-    var prioridadId by remember { mutableStateOf(1) }
-    var tecnicoId by remember { mutableStateOf(1) }
+    var prioridadId by remember { mutableStateOf(0) }
+    var tecnicoId by remember { mutableStateOf(0) }
     var editingTicket by remember { mutableStateOf<TicketEntity?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    val scope = rememberCoroutineScope()
 
     // Estados para los dropdowns
     var expandedPrioridad by remember { mutableStateOf(false) }
     var expandedTecnico by remember { mutableStateOf(false) }
-
 
     val prioridades by viewModel.prioridades.collectAsState()
     val tecnicos by viewModel.tecnicos.collectAsState()
@@ -95,47 +92,37 @@ fun TicketScreen(
                 .padding(innerPadding)
                 .padding(8.dp)
         ) {
-            // Encabezado
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
-                    onClick = { navController.popBackStack() }
-                ) {
+                IconButton(onClick = { navController.popBackStack() }) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                 }
-                Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = if (editingTicket == null) "Nuevo Ticket" else "Editar Ticket",
                     style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center
                 )
             }
 
             // Formulario
-            ElevatedCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(innerPadding)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    // Campo ID
+            ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    // Campo Id
                     OutlinedTextField(
-                        value = editingTicket?.ticketId?.toString() ?: "0",
+                        value = editingTicket?.ticketId?.toString()
+                            ?: "0", // <- Muestra el ID real
                         onValueChange = {},
-                        label = { Text("ID del Ticket") },
+                        label = { Text("ID Ticket") },
                         modifier = Modifier.fillMaxWidth(),
                         readOnly = true,
                         enabled = false
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
-
                     // Campo Asunto
                     OutlinedTextField(
                         value = asunto,
@@ -144,7 +131,7 @@ fun TicketScreen(
                         modifier = Modifier.fillMaxWidth(),
                         colors = outlinedTextFieldColors(
                             focusedBorderColor = Color.Green,
-                            unfocusedBorderColor = Color.Black,
+                            unfocusedBorderColor = Color.Black
                         )
                     )
 
@@ -161,7 +148,7 @@ fun TicketScreen(
                         maxLines = 5,
                         colors = outlinedTextFieldColors(
                             focusedBorderColor = Color.Green,
-                            unfocusedBorderColor = Color.Black,
+                            unfocusedBorderColor = Color.Black
                         )
                     )
 
@@ -175,13 +162,13 @@ fun TicketScreen(
                         modifier = Modifier.fillMaxWidth(),
                         colors = outlinedTextFieldColors(
                             focusedBorderColor = Color.Green,
-                            unfocusedBorderColor = Color.Black,
+                            unfocusedBorderColor = Color.Black
                         )
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-
+                    // Dropdown Prioridad
                     Box(modifier = Modifier.fillMaxWidth()) {
                         OutlinedButton(
                             onClick = { expandedPrioridad = true },
@@ -214,6 +201,7 @@ fun TicketScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
+                    // Dropdown Técnico
                     Box(modifier = Modifier.fillMaxWidth()) {
                         OutlinedButton(
                             onClick = { expandedTecnico = true },
@@ -260,14 +248,14 @@ fun TicketScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        // Botón Limpiar
+
                         OutlinedButton(
                             onClick = {
                                 asunto = ""
                                 descripcion = ""
                                 cliente = ""
-                                prioridadId = 1
-                                tecnicoId = 1
+                                prioridadId = 0
+                                tecnicoId = 0
                                 errorMessage = null
                                 editingTicket = null
                             },
@@ -285,42 +273,33 @@ fun TicketScreen(
                         // Botón Guardar
                         OutlinedButton(
                             onClick = {
-                                if (asunto.isBlank()) {
-                                    errorMessage = "El asunto no puede estar vacío"
-                                    return@OutlinedButton
+                                when {
+                                    asunto.isBlank() -> errorMessage = "El asunto no puede estar vacío"
+                                    descripcion.isBlank() -> errorMessage = "La descripción no puede estar vacía"
+                                    cliente.isBlank() -> errorMessage = "El cliente no puede estar vacío"
+                                    prioridadId == 0 -> errorMessage = "Debe seleccionar una prioridad"
+                                    tecnicoId == 0 -> errorMessage = "Debe seleccionar un técnico"
+                                    else -> {
+                                        viewModel.saveTicket(
+                                            TicketEntity(
+                                                ticketId = editingTicket?.ticketId,
+                                                asunto = asunto,
+                                                descripcion = descripcion,
+                                                cliente = cliente,
+                                                fecha = fecha,
+                                                prioridadId = prioridadId,
+                                                tecnicoId = tecnicoId
+                                            )
+                                        )
+                                        navController.navigateUp()
+                                    }
                                 }
-                                if (descripcion.isBlank()) {
-                                    errorMessage = "La descripción no puede estar vacía"
-                                    return@OutlinedButton
-                                }
-                                if (cliente.isBlank()) {
-                                    errorMessage = "El cliente no puede estar vacío"
-                                    return@OutlinedButton
-                                }
-
-                                viewModel.saveTicket(
-                                    TicketEntity(
-                                        ticketId = editingTicket?.ticketId,
-                                        asunto = asunto,
-                                        descripcion = descripcion,
-                                        cliente = cliente,
-                                        fecha = fecha,
-                                        prioridadId = prioridadId,
-                                        tecnicoId = tecnicoId
-                                    )
-                                )
-
-                                navController.navigateUp()
                             },
                             modifier = Modifier.padding(4.dp),
                             shape = RoundedCornerShape(16.dp),
                             border = BorderStroke(1.dp, Color.Blue)
                         ) {
-                            Icon(
-                                Icons.Default.Edit,
-                                contentDescription = "Guardar",
-                                tint = Color.Blue
-                            )
+                            Icon(Icons.Default.Edit, contentDescription = "Guardar", tint = Color.Blue)
                             Text(" Guardar")
                         }
                     }
