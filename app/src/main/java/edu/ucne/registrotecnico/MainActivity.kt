@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -58,6 +59,7 @@ import edu.ucne.registrotecnico.data.local.entities.TecnicoEntity
 import edu.ucne.registrotecnico.data.repository.PrioridadesRepository
 import edu.ucne.registrotecnico.data.repository.TecnicosRepository
 import edu.ucne.registrotecnico.data.repository.TicketsRepository
+import edu.ucne.registrotecnico.presentation.navigation.HomeNavHost
 import edu.ucne.registrotecnico.presentation.navigation.PrioridadesNavHost
 import edu.ucne.registrotecnico.presentation.navigation.TecnicosNavHost
 import edu.ucne.registrotecnico.presentation.navigation.TicketsNavHost
@@ -108,12 +110,18 @@ class MainActivity : ComponentActivity() {
 
             RegistroTecnicoAp2Theme {
                 val nav = rememberNavController()
-                TicketsNavHost(
-                    nav,
-                    ticketList,
-                    ticketsViewModel,
-                    nav
-                )
+                Scaffold(
+                    modifier = Modifier.fillMaxSize()
+                ) { paddingValues ->
+                    Box(modifier = Modifier.padding(paddingValues)) {
+                        HomeNavHost(
+                            navHostController = nav,
+                            prioridadesViewModel = prioridadViewModel,
+                            tecnicosViewModel = tecnicosViewModel,
+                            ticketsViewModel = ticketsViewModel
+                        )
+                    }
+                }
             }
         }
     }
