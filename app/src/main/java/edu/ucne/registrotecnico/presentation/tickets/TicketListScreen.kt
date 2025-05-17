@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
@@ -46,7 +47,8 @@ fun TicketListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Lista de Tickets") })
+                title = { Text("Lista de Tickets") }
+            )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { onEditClick(0) }) {
@@ -54,27 +56,39 @@ fun TicketListScreen(
             }
         }
     ) { padding ->
-        Column(modifier = modifier.padding(padding)) {
-
-            LazyColumn(
+        Column(
+            modifier = modifier
+                .padding(padding)
+                .fillMaxWidth()
+        ) {
+            // Card contenedor gris
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
-                    .padding(8.dp)
+                    .padding(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.LightGray.copy(alpha = 0.2f)
+                ),
+                shape = RoundedCornerShape(8.dp)
             ) {
-                items(ticketList) { ticket ->
-                    TicketCard(
-                        ticket = ticket,
-                        onEditClick = { onEditClick(ticket.ticketId) },
-                        onDeleteClick = { onDeleteClick(ticket) }
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    items(ticketList) { ticket ->
+                        TicketCard(
+                            ticket = ticket,
+                            onEditClick = { onEditClick(ticket.ticketId) },
+                            onDeleteClick = { onDeleteClick(ticket) }
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
                 }
             }
         }
     }
 }
-
 
 @Composable
 fun TicketCard(
@@ -86,7 +100,10 @@ fun TicketCard(
         elevation = CardDefaults.cardElevation(4.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp)
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Row(
             modifier = Modifier
@@ -112,11 +129,19 @@ fun TicketCard(
             }
 
             IconButton(onClick = onEditClick) {
-                Icon(Icons.Outlined.Edit, contentDescription = "Editar", tint = Color.Green)
+                Icon(
+                    Icons.Outlined.Edit,
+                    contentDescription = "Editar",
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
 
             IconButton(onClick = onDeleteClick) {
-                Icon(Icons.Outlined.Delete, contentDescription = "Eliminar", tint = Color.Green)
+                Icon(
+                    Icons.Outlined.Delete,
+                    contentDescription = "Eliminar",
+                    tint = MaterialTheme.colorScheme.error
+                )
             }
         }
     }
