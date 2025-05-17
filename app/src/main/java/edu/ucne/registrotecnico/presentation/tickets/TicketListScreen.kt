@@ -31,6 +31,9 @@ import androidx.compose.ui.unit.dp
 import edu.ucne.registrotecnico.data.local.entities.PrioridadEntity
 import edu.ucne.registrotecnico.data.local.entities.TicketEntity
 import edu.ucne.registrotecnico.ui.theme.RegistroTecnicoAp2Theme
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -97,7 +100,12 @@ fun TicketCard(
                     style = MaterialTheme.typography.bodySmall
                 )
                 Text(
-                    text = ticket.descripcion,
+                    text = ticket.fecha.toFormattedString(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray
+                )
+                Text(
+                    text = ticket.asunto,
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(top = 4.dp)
                 )
@@ -114,6 +122,10 @@ fun TicketCard(
     }
 }
 
+fun Date.toFormattedString(): String {
+    val format = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+    return format.format(this)
+}
 //@Preview
 //@Composable
 //private fun Preview() {
