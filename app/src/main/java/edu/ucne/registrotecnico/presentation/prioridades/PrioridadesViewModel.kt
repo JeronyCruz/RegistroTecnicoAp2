@@ -6,6 +6,9 @@ import edu.ucne.registrotecnico.data.local.entities.PrioridadEntity
 import edu.ucne.registrotecnico.data.local.entities.TecnicoEntity
 import edu.ucne.registrotecnico.data.repository.PrioridadesRepository
 import edu.ucne.registrotecnico.data.repository.TecnicosRepository
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class PrioridadesViewModel (
@@ -26,5 +29,13 @@ class PrioridadesViewModel (
             prioridadRepository.delete(prioridad)
         }
     }
+
+    // Exponer las prioridades como StateFlow
+    val prioridades: StateFlow<List<PrioridadEntity>> = prioridadRepository.getAll()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
 }

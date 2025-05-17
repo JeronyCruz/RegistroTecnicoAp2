@@ -65,4 +65,11 @@ class TicketsViewModel (
             ticketsRepository.delete(ticket)
         }
     }
+
+    val ticketsS: StateFlow<List<TicketEntity>> = ticketsRepository.getAll()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 }
