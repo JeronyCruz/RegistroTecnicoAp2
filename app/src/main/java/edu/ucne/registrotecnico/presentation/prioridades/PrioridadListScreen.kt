@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
@@ -43,35 +45,48 @@ fun PrioridadListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Lista de Prioridades") })
+                title = { Text("Lista de Prioridades") }
+            )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { onEditClick(0) }) {
-                Icon(Icons.Filled.Add, "Agregar nueva")
+                Icon(Icons.Filled.Add, "Agregar nueva prioridad")
             }
         }
     ) { padding ->
-        Column(modifier = modifier.padding(padding)) {
-
-            LazyColumn(
+        Column(
+            modifier = modifier
+                .padding(padding)
+                .fillMaxWidth()
+        ) {
+            // Card contenedor gris
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
-                    .padding(8.dp)
+                    .padding(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.LightGray.copy(alpha = 0.2f)
+                ),
+                shape = RoundedCornerShape(8.dp)
             ) {
-                items(prioridadList) { prioridad ->
-                    PrioridadCard(
-                        prioridad = prioridad,
-                        onEditClick = { onEditClick(prioridad.prioridadId) },
-                        onDeleteClick = { onDeleteClick(prioridad) }
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    items(prioridadList) { prioridad ->
+                        PrioridadCard(
+                            prioridad = prioridad,
+                            onEditClick = { onEditClick(prioridad.prioridadId) },
+                            onDeleteClick = { onDeleteClick(prioridad) }
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
                 }
             }
         }
     }
 }
-
 
 @Composable
 fun PrioridadCard(
@@ -83,7 +98,10 @@ fun PrioridadCard(
         elevation = CardDefaults.cardElevation(4.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp)
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Row(
             modifier = Modifier
@@ -94,21 +112,38 @@ fun PrioridadCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "ID: ${prioridad.prioridadId}",
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray
                 )
                 Text(
                     text = prioridad.descripcion,
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(top = 4.dp)
+                    modifier = Modifier.padding(top = 4.dp),
+                    color = when(prioridad.descripcion) {
+                        "Alta" -> MaterialTheme.colorScheme.error
+                        "Media" -> Color(0xFFFFA500) // Naranja
+                        "Baja" -> MaterialTheme.colorScheme.primary
+                        else -> MaterialTheme.colorScheme.onSurface
+                    }
                 )
             }
 
+            Spacer(modifier = Modifier.width(8.dp))
+
             IconButton(onClick = onEditClick) {
-                Icon(Icons.Outlined.Edit, contentDescription = "Editar", tint = Color.Green)
+                Icon(
+                    Icons.Outlined.Edit,
+                    contentDescription = "Editar",
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
 
             IconButton(onClick = onDeleteClick) {
-                Icon(Icons.Outlined.Delete, contentDescription = "Eliminar", tint = Color.Green)
+                Icon(
+                    Icons.Outlined.Delete,
+                    contentDescription = "Eliminar",
+                    tint = MaterialTheme.colorScheme.error
+                )
             }
         }
     }
@@ -120,13 +155,18 @@ private fun Preview() {
     val prioridades = listOf(
         PrioridadEntity(
             prioridadId = 1,
-            descripcion = "Alta",
+            descripcion = "Alta"
         ),
         PrioridadEntity(
             prioridadId = 2,
-            descripcion = "Baja",
+            descripcion = "Media"
+        ),
+        PrioridadEntity(
+            prioridadId = 3,
+            descripcion = "Baja"
         )
     )
+
     RegistroTecnicoAp2Theme {
         PrioridadListScreen(
             prioridadList = prioridades,
