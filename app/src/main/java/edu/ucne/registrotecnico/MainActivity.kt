@@ -55,15 +55,25 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import edu.ucne.registrotecnico.data.local.entities.TecnicoEntity
+import edu.ucne.registrotecnico.data.repository.PrioridadesRepository
 import edu.ucne.registrotecnico.data.repository.TecnicosRepository
+import edu.ucne.registrotecnico.data.repository.TicketsRepository
+import edu.ucne.registrotecnico.presentation.navigation.PrioridadesNavHost
 import edu.ucne.registrotecnico.presentation.navigation.TecnicosNavHost
+import edu.ucne.registrotecnico.presentation.navigation.TicketsNavHost
+import edu.ucne.registrotecnico.presentation.prioridades.PrioridadesViewModel
 import edu.ucne.registrotecnico.presentation.tecnicos.TecnicosViewModel
+import edu.ucne.registrotecnico.presentation.tickets.TicketsViewModel
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private lateinit var tecnicoDb: TecnicoDb
     private lateinit var tecnicosRepository: TecnicosRepository
+    private lateinit var prioridadesRepository: PrioridadesRepository
     private lateinit var tecnicosViewModel: TecnicosViewModel
+    private lateinit var prioridadViewModel: PrioridadesViewModel
+    private lateinit var ticketsRepository: TicketsRepository
+    private lateinit var ticketsViewModel: TicketsViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -77,9 +87,19 @@ class MainActivity : ComponentActivity() {
         tecnicosRepository = TecnicosRepository(tecnicoDb.TecnicoDao())
         tecnicosViewModel = TecnicosViewModel(tecnicosRepository)
 
+        prioridadesRepository = PrioridadesRepository(tecnicoDb.PrioridadDao())
+        prioridadViewModel = PrioridadesViewModel(prioridadesRepository)
+
+        ticketsRepository = TicketsRepository(tecnicoDb.TicketDao())
+        ticketsViewModel = TicketsViewModel(
+            ticketsRepository = ticketsRepository,
+            tecnicosRepository = tecnicosRepository,
+            prioridadesRepository = prioridadesRepository
+        )
+
         setContent {
             val lifecycleOwner = LocalLifecycleOwner.current
-            val tecnicoList by tecnicoDb.TecnicoDao().getAll()
+            val ticketList by tecnicoDb.TicketDao().getAll()
                 .collectAsStateWithLifecycle(
                     initialValue = emptyList(),
                     lifecycleOwner = lifecycleOwner,
@@ -88,10 +108,10 @@ class MainActivity : ComponentActivity() {
 
             RegistroTecnicoAp2Theme {
                 val nav = rememberNavController()
-                TecnicosNavHost(
+                TicketsNavHost(
                     nav,
-                    tecnicoList,
-                    tecnicosViewModel,
+                    ticketList,
+                    ticketsViewModel,
                     nav
                 )
             }
