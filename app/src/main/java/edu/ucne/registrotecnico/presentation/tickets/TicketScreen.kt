@@ -54,13 +54,13 @@ fun TicketScreen(
     navController: NavController,
     function: () -> Unit
 ) {
-    // Estados para todos los campos del ticket
+
     var asunto by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
     var cliente by remember { mutableStateOf("") }
     var fecha by remember { mutableStateOf(Date()) }
-    var prioridadId by remember { mutableStateOf(1) } // Valor por defecto
-    var tecnicoId by remember { mutableStateOf(1) } // Valor por defecto
+    var prioridadId by remember { mutableStateOf(1) }
+    var tecnicoId by remember { mutableStateOf(1) }
     var editingTicket by remember { mutableStateOf<TicketEntity?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
@@ -69,7 +69,7 @@ fun TicketScreen(
     var expandedPrioridad by remember { mutableStateOf(false) }
     var expandedTecnico by remember { mutableStateOf(false) }
 
-    // Suponiendo que tienes estas listas en tu ViewModel
+
     val prioridades by viewModel.prioridades.collectAsState()
     val tecnicos by viewModel.tecnicos.collectAsState()
 
@@ -95,13 +95,13 @@ fun TicketScreen(
                 .padding(innerPadding)
                 .padding(8.dp)
         ) {
+            // Encabezado
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    onClick = { navController.popBackStack() },
-                    modifier = Modifier.align(Alignment.CenterVertically)
+                    onClick = { navController.popBackStack() }
                 ) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                 }
@@ -113,6 +113,7 @@ fun TicketScreen(
                 )
             }
 
+            // Formulario
             ElevatedCard(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -123,9 +124,9 @@ fun TicketScreen(
                         .fillMaxWidth()
                         .padding(16.dp)
                 ) {
-                    // Campo ID (solo lectura)
+                    // Campo ID
                     OutlinedTextField(
-                        value = editingTicket?.ticketId?.toString() ?: "Nuevo",
+                        value = editingTicket?.ticketId?.toString() ?: "0",
                         onValueChange = {},
                         label = { Text("ID del Ticket") },
                         modifier = Modifier.fillMaxWidth(),
@@ -180,22 +181,20 @@ fun TicketScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Selector de Prioridad
+
                     Box(modifier = Modifier.fillMaxWidth()) {
-                        OutlinedTextField(
-                            value = prioridades.find { it.prioridadId == prioridadId }?.descripcion ?: "Seleccione técnico",
-                            onValueChange = {},
-                            label = { Text("Prioridad") },
-                            modifier = Modifier.fillMaxWidth(),
-                            readOnly = true,
-                            trailingIcon = {
-                                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-                            },
-                            colors = outlinedTextFieldColors(
-                                focusedBorderColor = Color.Green,
-                                unfocusedBorderColor = Color.Black,
+                        OutlinedButton(
+                            onClick = { expandedPrioridad = true },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                prioridades.find { it.prioridadId == prioridadId }?.descripcion
+                                    ?: "Seleccione prioridad",
+                                modifier = Modifier.weight(1f),
+                                textAlign = TextAlign.Start
                             )
-                        )
+                            Icon(Icons.Default.ArrowDropDown, contentDescription = "Prioridad")
+                        }
                         DropdownMenu(
                             expanded = expandedPrioridad,
                             onDismissRequest = { expandedPrioridad = false },
@@ -205,7 +204,7 @@ fun TicketScreen(
                                 DropdownMenuItem(
                                     text = { Text(prioridad.descripcion) },
                                     onClick = {
-                                        prioridadId = prioridad.prioridadId ?: 0 // ← Corrección aquí (elimina el punto)
+                                        prioridadId = prioridad.prioridadId ?: 0
                                         expandedPrioridad = false
                                     }
                                 )
@@ -215,31 +214,27 @@ fun TicketScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Selector de Técnico
                     Box(modifier = Modifier.fillMaxWidth()) {
-                        OutlinedTextField(
-                            value = tecnicos.find { it.tecnicoId == tecnicoId }?.nombre ?: "Seleccione técnico",
-                            onValueChange = {},
-                            label = { Text("Técnico Asignado") },
-                            modifier = Modifier.fillMaxWidth(),
-                            readOnly = true,
-                            trailingIcon = {
-                                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-                            },
-                            colors = outlinedTextFieldColors(
-                                focusedBorderColor = Color.Green,
-                                unfocusedBorderColor = Color.Black,
+                        OutlinedButton(
+                            onClick = { expandedTecnico = true },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                tecnicos.find { it.tecnicoId == tecnicoId }?.nombre
+                                    ?: "Seleccione técnico",
+                                modifier = Modifier.weight(1f),
+                                textAlign = TextAlign.Start
                             )
-                        )
+                            Icon(Icons.Default.ArrowDropDown, contentDescription = "Técnico")
+                        }
                         DropdownMenu(
                             expanded = expandedTecnico,
-                            onDismissRequest = { expandedTecnico = false }
+                            onDismissRequest = { expandedTecnico = false },
+                            modifier = Modifier.fillMaxWidth()
                         ) {
                             tecnicos.forEach { tecnico ->
                                 DropdownMenuItem(
-                                    text = {
-                                        Text(tecnico.nombre)
-                                    },
+                                    text = { Text(tecnico.nombre) },
                                     onClick = {
                                         tecnicoId = tecnico.tecnicoId ?: 0
                                         expandedTecnico = false
@@ -251,7 +246,7 @@ fun TicketScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Mostrar mensajes de error
+                    // Mensajes de error
                     errorMessage?.let {
                         Text(
                             text = it,
@@ -314,15 +309,6 @@ fun TicketScreen(
                                         tecnicoId = tecnicoId
                                     )
                                 )
-
-                                // Limpiar después de guardar
-                                asunto = ""
-                                descripcion = ""
-                                cliente = ""
-                                prioridadId = 1
-                                tecnicoId = 1
-                                errorMessage = null
-                                editingTicket = null
 
                                 navController.navigateUp()
                             },
