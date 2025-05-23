@@ -1,6 +1,5 @@
 package edu.ucne.registrotecnico.presentation.tickets
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,300 +10,303 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.TextFieldDefaults.outlinedTextFieldColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import edu.ucne.registrotecnico.data.local.entities.TicketEntity
-import java.util.Date
+import edu.ucne.registrotecnico.data.local.entities.PrioridadEntity
+import edu.ucne.registrotecnico.data.local.entities.TecnicoEntity
 
 
 @Composable
 fun TicketScreen(
     ticketId: Int? = null,
-    viewModel: TicketsViewModel,
+    viewModel: TicketsViewModel = hiltViewModel(),
     navController: NavController,
-    function: () -> Unit
+    goBack: () -> Unit
 ) {
-    var asunto by remember { mutableStateOf("") }
-    var descripcion by remember { mutableStateOf("") }
-    var cliente by remember { mutableStateOf("") }
-    var fecha by remember { mutableStateOf(Date()) }
-    var prioridadId by remember { mutableStateOf(0) }
-    var tecnicoId by remember { mutableStateOf(0) }
-    var editingTicket by remember { mutableStateOf<TicketEntity?>(null) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-
-    // Estados para los dropdowns
-    var expandedPrioridad by remember { mutableStateOf(false) }
-    var expandedTecnico by remember { mutableStateOf(false) }
-
-    val prioridades by viewModel.prioridades.collectAsState()
-    val tecnicos by viewModel.tecnicos.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(ticketId) {
-        if (ticketId != null && ticketId > 0) {
-            val ticket = viewModel.findTicket(ticketId)
-            ticket?.let {
-                editingTicket = it
-                asunto = it.asunto
-                descripcion = it.descripcion
-                cliente = it.cliente
-                fecha = it.fecha
-                prioridadId = it.prioridadId
-                tecnicoId = it.tecnicoId
+        ticketId?.let {
+            if (it > 0) {
+                viewModel.findTickets(it)
             }
         }
     }
 
-    Scaffold { innerPadding ->
-        Column(
+    TicketBodyScreen(
+        uiState = uiState,
+        onEvent = viewModel::onEvent,
+        goBack = goBack
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TicketBodyScreen(
+    uiState: TicketUiState,
+    onEvent: (TicketEvent) -> Unit,
+    goBack: () -> Unit
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = if (uiState.ticketId != null && uiState.ticketId != 0) "Editar Ticket" else "Nuevo Ticket",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = goBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(8.dp)
         ) {
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
             ) {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
-                }
-                Text(
-                    text = if (editingTicket == null) "Nuevo Ticket" else "Editar Ticket",
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center
+                // Campo ID (solo lectura)
+                OutlinedTextField(
+                    value = uiState.ticketId?.toString() ?: "Nuevo",
+                    onValueChange = {},
+                    label = { Text("ID Ticket") },
+                    modifier = Modifier.fillMaxWidth(),
+                    readOnly = true,
+                    enabled = false
                 )
-            }
 
-            // Formulario
-            ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    // Campo Id
-                    OutlinedTextField(
-                        value = editingTicket?.ticketId?.toString()
-                            ?: "0", // <- Muestra el ID real
-                        onValueChange = {},
-                        label = { Text("ID Ticket") },
-                        modifier = Modifier.fillMaxWidth(),
-                        readOnly = true,
-                        enabled = false
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Campo Asunto
+                OutlinedTextField(
+                    value = uiState.asunto,
+                    onValueChange = { onEvent(TicketEvent.AsuntoChange(it)) },
+                    label = { Text("Asunto") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    isError = uiState.errorMessage != null
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Campo Descripción
+                OutlinedTextField(
+                    value = uiState.descripcion,
+                    onValueChange = { onEvent(TicketEvent.DescripcionChange(it)) },
+                    label = { Text("Descripción") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp),
+                    maxLines = 5,
+                    isError = uiState.errorMessage != null
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Campo Cliente
+                OutlinedTextField(
+                    value = uiState.cliente,
+                    onValueChange = { onEvent(TicketEvent.ClienteChange(it)) },
+                    label = { Text("Cliente") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    isError = uiState.errorMessage != null
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Selector de Prioridad
+                PrioridadDropdown(
+                    prioridadId = uiState.prioridadId,
+                    prioridades = uiState.prioridades,
+                    onPrioridadSelected = { id -> onEvent(TicketEvent.PrioridadIdChange(id)) },
+                    errorMessage = if (uiState.errorMessage != null && uiState.prioridadId == 0) "Seleccione una prioridad" else null
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Selector de Técnico
+                TecnicoDropdown(
+                    tecnicoId = uiState.tecnicoId,
+                    tecnicos = uiState.tecnicos,
+                    onTecnicoSelected = { id -> onEvent(TicketEvent.TecnicoIdChange(id)) },
+                    errorMessage = if (uiState.errorMessage != null && uiState.tecnicoId == 0) "Seleccione un técnico" else null
+                )
+
+                uiState.errorMessage?.let { message ->
+                    Text(
+                        text = message,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(top = 8.dp)
                     )
+                }
 
-                    Spacer(modifier = Modifier.height(8.dp))
-                    // Campo Asunto
-                    OutlinedTextField(
-                        value = asunto,
-                        onValueChange = { asunto = it },
-                        label = { Text("Asunto") },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = outlinedTextFieldColors(
-                            focusedBorderColor = Color.Green,
-                            unfocusedBorderColor = Color.Black
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Botones de acción
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Button(
+                        onClick = { onEvent(TicketEvent.New) },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                         )
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Campo Descripción
-                    OutlinedTextField(
-                        value = descripcion,
-                        onValueChange = { descripcion = it },
-                        label = { Text("Descripción") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(120.dp),
-                        maxLines = 5,
-                        colors = outlinedTextFieldColors(
-                            focusedBorderColor = Color.Green,
-                            unfocusedBorderColor = Color.Black
-                        )
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Campo Cliente
-                    OutlinedTextField(
-                        value = cliente,
-                        onValueChange = { cliente = it },
-                        label = { Text("Cliente") },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = outlinedTextFieldColors(
-                            focusedBorderColor = Color.Green,
-                            unfocusedBorderColor = Color.Black
-                        )
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Dropdown Prioridad
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        OutlinedButton(
-                            onClick = { expandedPrioridad = true },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                prioridades.find { it.prioridadId == prioridadId }?.descripcion
-                                    ?: "Seleccione prioridad",
-                                modifier = Modifier.weight(1f),
-                                textAlign = TextAlign.Start
-                            )
-                            Icon(Icons.Default.ArrowDropDown, contentDescription = "Prioridad")
-                        }
-                        DropdownMenu(
-                            expanded = expandedPrioridad,
-                            onDismissRequest = { expandedPrioridad = false },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            prioridades.forEach { prioridad ->
-                                DropdownMenuItem(
-                                    text = { Text(prioridad.descripcion) },
-                                    onClick = {
-                                        prioridadId = prioridad.prioridadId ?: 0
-                                        expandedPrioridad = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Dropdown Técnico
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        OutlinedButton(
-                            onClick = { expandedTecnico = true },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                tecnicos.find { it.tecnicoId == tecnicoId }?.nombre
-                                    ?: "Seleccione técnico",
-                                modifier = Modifier.weight(1f),
-                                textAlign = TextAlign.Start
-                            )
-                            Icon(Icons.Default.ArrowDropDown, contentDescription = "Técnico")
-                        }
-                        DropdownMenu(
-                            expanded = expandedTecnico,
-                            onDismissRequest = { expandedTecnico = false },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            tecnicos.forEach { tecnico ->
-                                DropdownMenuItem(
-                                    text = { Text(tecnico.nombre) },
-                                    onClick = {
-                                        tecnicoId = tecnico.tecnicoId ?: 0
-                                        expandedTecnico = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Mensajes de error
-                    errorMessage?.let {
-                        Text(
-                            text = it,
-                            color = Color.Red,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                    }
-
-                    // Botones de acción
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
+                        Icon(Icons.Default.Clear, contentDescription = "Limpiar")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Limpiar")
+                    }
 
-                        OutlinedButton(
-                            onClick = {
-                                asunto = ""
-                                descripcion = ""
-                                cliente = ""
-                                prioridadId = 0
-                                tecnicoId = 0
-                                errorMessage = null
-                                editingTicket = null
-                            },
-                            modifier = Modifier.padding(4.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            border = BorderStroke(1.dp, Color.Blue),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = Color.Blue
-                            )
-                        ) {
-                            Icon(Icons.Default.Add, contentDescription = "Nuevo", tint = Color.Blue)
-                            Text(" Limpiar")
-                        }
-
-                        // Botón Guardar
-                        OutlinedButton(
-                            onClick = {
-                                when {
-                                    asunto.isBlank() -> errorMessage = "El asunto no puede estar vacío"
-                                    descripcion.isBlank() -> errorMessage = "La descripción no puede estar vacía"
-                                    cliente.isBlank() -> errorMessage = "El cliente no puede estar vacío"
-                                    prioridadId == 0 -> errorMessage = "Debe seleccionar una prioridad"
-                                    tecnicoId == 0 -> errorMessage = "Debe seleccionar un técnico"
-                                    else -> {
-                                        viewModel.saveTicket(
-                                            TicketEntity(
-                                                ticketId = editingTicket?.ticketId,
-                                                asunto = asunto,
-                                                descripcion = descripcion,
-                                                cliente = cliente,
-                                                fecha = fecha,
-                                                prioridadId = prioridadId,
-                                                tecnicoId = tecnicoId
-                                            )
-                                        )
-                                        navController.navigateUp()
-                                    }
-                                }
-                            },
-                            modifier = Modifier.padding(4.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            border = BorderStroke(1.dp, Color.Blue)
-                        ) {
-                            Icon(Icons.Default.Edit, contentDescription = "Guardar", tint = Color.Blue)
-                            Text(" Guardar")
-                        }
+                    Button(
+                        onClick = { onEvent(TicketEvent.Save) },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = "Guardar")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Guardar")
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun PrioridadDropdown(
+    prioridadId: Int,
+    prioridades: List<PrioridadEntity>,
+    onPrioridadSelected: (Int) -> Unit,
+    errorMessage: String?
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(modifier = Modifier.fillMaxWidth()) {
+//        OutlinedTextField(
+//            value = prioridades.find { it.prioridadId == prioridadId }?.descripcion
+//                ?: "Seleccione prioridad",
+//            onValueChange = {},
+//            label = { Text("Prioridad") },
+//            modifier = Modifier.fillMaxWidth(),
+//            readOnly = true,
+//            trailingIcon = {
+//                Icon(Icons.Default.ArrowDropDown, contentDescription = "Prioridad")
+//            },
+//            isError = errorMessage != null,
+//            onClick = { expanded = true }
+//        )
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            prioridades.forEach { prioridad ->
+                DropdownMenuItem(
+                    text = { Text(prioridad.descripcion) },
+                    onClick = {
+                        onPrioridadSelected(prioridad.prioridadId ?: 0)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+
+    errorMessage?.let {
+        Text(
+            text = it,
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+        )
+    }
+}
+
+@Composable
+private fun TecnicoDropdown(
+    tecnicoId: Int,
+    tecnicos: List<TecnicoEntity>,
+    onTecnicoSelected: (Int) -> Unit,
+    errorMessage: String?
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(modifier = Modifier.fillMaxWidth()) {
+//        OutlinedTextField(
+//            value = tecnicos.find { it.tecnicoId == tecnicoId }?.nombre ?: "Seleccione técnico",
+//            onValueChange = {},
+//            label = { Text("Técnico") },
+//            modifier = Modifier.fillMaxWidth(),
+//            readOnly = true,
+//            trailingIcon = {
+//                Icon(Icons.Default.ArrowDropDown, contentDescription = "Técnico")
+//            },
+//            isError = errorMessage != null,
+//            onClick = { expanded = true }
+//        )
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            tecnicos.forEach { tecnico ->
+                DropdownMenuItem(
+                    text = { Text(tecnico.nombre) },
+                    onClick = {
+                        onTecnicoSelected(tecnico.tecnicoId ?: 0)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+
+    errorMessage?.let {
+        Text(
+            text = it,
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+        )
     }
 }
