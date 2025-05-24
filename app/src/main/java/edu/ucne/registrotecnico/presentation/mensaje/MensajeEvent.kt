@@ -1,6 +1,5 @@
 package edu.ucne.registrotecnico.presentation.mensaje
 
-import edu.ucne.registrotecnico.presentation.prioridades.PrioridadEvent
 import java.util.Date
 
 sealed interface MensajeEvent {

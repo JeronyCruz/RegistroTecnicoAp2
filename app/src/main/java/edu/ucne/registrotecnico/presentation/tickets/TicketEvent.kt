@@ -1,6 +1,5 @@
 package edu.ucne.registrotecnico.presentation.tickets
 
-import edu.ucne.registrotecnico.presentation.tecnicos.TecnicoEvent
 import java.util.Date
 
 sealed interface TicketEvent {

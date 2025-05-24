@@ -9,20 +9,14 @@ import edu.ucne.registrotecnico.presentation.home.HomeScreen
 import edu.ucne.registrotecnico.presentation.mensaje.MensajeScreen
 import edu.ucne.registrotecnico.presentation.prioridades.PrioridadListScreen
 import edu.ucne.registrotecnico.presentation.prioridades.PrioridadScreen
-import edu.ucne.registrotecnico.presentation.prioridades.PrioridadesViewModel
 import edu.ucne.registrotecnico.presentation.tecnicos.TecnicoListScreen
 import edu.ucne.registrotecnico.presentation.tecnicos.TecnicoScreen
-import edu.ucne.registrotecnico.presentation.tecnicos.TecnicosViewModel
 import edu.ucne.registrotecnico.presentation.tickets.TicketListScreen
 import edu.ucne.registrotecnico.presentation.tickets.TicketScreen
-import edu.ucne.registrotecnico.presentation.tickets.TicketsViewModel
 
 @Composable
 fun HomeNavHost(
-    navHostController: NavHostController,
-    prioridadesViewModel: PrioridadesViewModel,
-    tecnicosViewModel: TecnicosViewModel,
-    ticketsViewModel: TicketsViewModel
+    navHostController: NavHostController
 ) {
     NavHost(
         navController = navHostController,
