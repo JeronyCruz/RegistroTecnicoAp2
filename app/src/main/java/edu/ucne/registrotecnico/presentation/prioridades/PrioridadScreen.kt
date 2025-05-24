@@ -1,6 +1,5 @@
 package edu.ucne.registrotecnico.presentation.prioridades
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,188 +9,145 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.OutlinedButton
 import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import edu.ucne.registrotecnico.data.local.entities.PrioridadEntity
-import edu.ucne.registrotecnico.data.local.entities.TecnicoEntity
-import edu.ucne.registrotecnico.presentation.tecnicos.TecnicosViewModel
 
 @Composable
 fun PrioridadScreen(
     prioridadId: Int? = null,
-    viewModel: PrioridadesViewModel,
-    navController: NavController,
-    function: () -> Unit
+    viewModel: PrioridadesViewModel = hiltViewModel(),
+//    navController: NavController,
+    goBack: () -> Unit
 ) {
-    var descripcion by remember { mutableStateOf("") }
-    var editingPrioridad by remember { mutableStateOf<PrioridadEntity?>(null) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    val scope = rememberCoroutineScope()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(prioridadId) {
-        if (prioridadId != null && prioridadId > 0) {
-            val prioridad = viewModel.findPrioridad(prioridadId)
-            prioridad?.let {
-                editingPrioridad = it
-                descripcion = it.descripcion
+        prioridadId?.let {
+            if (it > 0) {
+                viewModel.findPrioridad(it)
             }
         }
     }
 
+    PrioridadBodyScreen(
+        uiState = uiState,
+        onEvent = viewModel::onEvent,
+        goBack = goBack
+    )
+}
 
-    Scaffold { innerPadding ->
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PrioridadBodyScreen(
+    uiState: PrioridadUiState,
+    onEvent: (PrioridadEvent) -> Unit,
+    goBack: () -> Unit
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = if (uiState.prioridadId != null && uiState.prioridadId != 0) "Editar Prioridad" else "Nueva Prioridad",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = goBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(8.dp)
+                .padding(16.dp)
         ) {
-            Row(
+            // Campo ID (solo lectura)
+            OutlinedTextField(
+                value = uiState.prioridadId?.toString() ?: "Nuevo",
+                onValueChange = {},
+                label = { Text("ID Prioridad") },
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (navController != null) {
-                    IconButton(
-                        onClick = { navController.popBackStack() },
-                        modifier = Modifier.align(Alignment.CenterVertically)
-                    ) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
-                    }
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Registro de Prioridades",
-                    style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.Center
+                readOnly = true,
+                enabled = false
+            )
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Campo Descripción
+            OutlinedTextField(
+                value = uiState.descripcion,
+                onValueChange = { onEvent(PrioridadEvent.DescripcionChange(it)) },
+                label = { Text("Descripción de la Prioridad") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                isError = uiState.errorMessage != null
+            )
+
+            uiState.errorMessage?.let { message ->
+                Text(
+                    text = message,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(top = 8.dp)
                 )
             }
-            // Formulario de Registro
-            ElevatedCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(innerPadding)
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Botones de acción
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
+                Button(
+                    onClick = { onEvent(PrioridadEvent.New) },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = MaterialTheme.colorScheme.secondaryContainer,
+                        containerColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
                 ) {
-                    OutlinedTextField(
-                        value = editingPrioridad?.prioridadId?.toString()
-                            ?: "0", // <- Muestra el ID real
-                        onValueChange = {},
-                        label = { Text("ID Prioridad") },
-                        modifier = Modifier.fillMaxWidth(),
-                        readOnly = true,
-                        enabled = false
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Icon(Icons.Default.Clear, contentDescription = "Limpiar")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Limpiar")
+                }
 
-                    OutlinedTextField(
-                        value = descripcion,
-                        onValueChange = { descripcion = it },
-                        label = { Text("Descripcion de Prioridad") },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = Color.Green,
-                            unfocusedBorderColor = Color.Black,
-                        )
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    errorMessage?.let {
-                        Text(
-                            text = it,
-                            color = Color.Red,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        OutlinedButton(
-                            onClick = {
-                                descripcion = ""
-                                errorMessage = null
-                                editingPrioridad = null
-                            },
-                            modifier = Modifier
-                                .padding(4.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            border = BorderStroke(1.dp, Color.Blue),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = Color.Blue
-                            )
-                        ) {
-                            Icon(Icons.Default.Add, contentDescription = "Nuevo", tint = Color.Blue)
-                            Text(" Limpiar")
-                        }
-
-                        OutlinedButton(
-                            onClick = {
-                                if (descripcion.isBlank()) {
-                                    errorMessage = "El nombre no puede estar vacío"
-                                    return@OutlinedButton
-                                }
-
-                                viewModel.savePrioridad(
-                                    PrioridadEntity(
-                                        prioridadId = editingPrioridad?.prioridadId,
-                                        descripcion = descripcion,
-                                    )
-                                )
-                                descripcion = ""
-                                errorMessage = null
-                                editingPrioridad = null
-
-                                navController.navigateUp()
-                            },
-                            modifier = Modifier
-                                .padding(4.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            border = BorderStroke(1.dp, Color.Blue)
-                        ) {
-                            Icon(
-                                Icons.Default.Edit,
-                                contentDescription = "Guardar",
-                                tint = Color.Blue
-                            )
-                            Text(" Guardar")
-                        }
-                    }
+                Button(
+                    onClick = {
+                        onEvent(PrioridadEvent.Save)
+                        goBack()
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.Edit, contentDescription = "Guardar")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Guardar")
                 }
             }
         }
-
     }
 }

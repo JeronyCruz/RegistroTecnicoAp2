@@ -2,21 +2,17 @@ package edu.ucne.registrotecnico.presentation.prioridades
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.registrotecnico.data.local.entities.PrioridadEntity
-import edu.ucne.registrotecnico.data.local.entities.TecnicoEntity
 import edu.ucne.registrotecnico.data.repository.PrioridadesRepository
-import edu.ucne.registrotecnico.data.repository.TecnicosRepository
-import edu.ucne.registrotecnico.presentation.tecnicos.TecnicoUiState
-import edu.ucne.registrotecnico.presentation.tecnicos.toEntity
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class PrioridadesViewModel (
+@HiltViewModel
+class PrioridadesViewModel @Inject constructor(
     private val prioridadRepository: PrioridadesRepository
 ): ViewModel() {
     private val _uiState = MutableStateFlow(PrioridadUiState())
@@ -28,29 +24,13 @@ class PrioridadesViewModel (
 
     fun  onEvent(event: PrioridadEvent){
         when(event){
-            PrioridadEvent.Delete -> TODO()
-            is PrioridadEvent.DescripcionChange -> TODO()
-            PrioridadEvent.New -> TODO()
-            is PrioridadEvent.PrioridadChange -> TODO()
-            PrioridadEvent.Save -> TODO()
+            PrioridadEvent.Delete -> deletePrioridad()
+            is PrioridadEvent.DescripcionChange -> onDescripcionChange(event.descripcion)
+            PrioridadEvent.New -> nuevo()
+            is PrioridadEvent.PrioridadChange -> onPrioridadIdChange(event.prioridadId)
+            PrioridadEvent.Save -> savePrioridad()
         }
     }
-
-//    fun savePrioridad(prioridad: PrioridadEntity) {
-//        viewModelScope.launch {
-//            prioridadRepository.save(prioridad)
-//        }
-//    }
-//
-//    suspend fun findPrioridad(id: Int): PrioridadEntity? {
-//        return prioridadRepository.find(id)
-//    }
-//
-//    fun deletePrioridad(prioridad: PrioridadEntity) {
-//        viewModelScope.launch {
-//            prioridadRepository.delete(prioridad)
-//        }
-//    }
 
     private fun nuevo() {
         _uiState.update {
@@ -116,14 +96,6 @@ class PrioridadesViewModel (
             it.copy(prioridadId = prioridadId)
         }
     }
-
-//    // Exponer las prioridades como StateFlow
-//    val prioridades: StateFlow<List<PrioridadEntity>> = prioridadRepository.getAll()
-//        .stateIn(
-//            scope = viewModelScope,
-//            started = SharingStarted.WhileSubscribed(5000),
-//            initialValue = emptyList()
-//        )
 
 }
 
