@@ -44,6 +44,8 @@ class MensajesViewModel @Inject constructor(
                 onTicketIdChange(event.ticketId)
                 getMensajes(event.ticketId)
             }
+
+            is MensajeEvent.tipoRemitenteChange -> onttipoRemitenteChange(event.tipoRemitente)
         }
     }
 
@@ -95,6 +97,13 @@ class MensajesViewModel @Inject constructor(
                 }
             } else {
                 mensajeRepository.save(_uiState.value.toEntity())
+                _uiState.update {
+                    it.copy(
+                        contenido = "",
+                        remitente = "",
+                        errorMessage = null
+                    )
+                }
             }
         }
     }
@@ -135,6 +144,11 @@ class MensajesViewModel @Inject constructor(
             it.copy(ticketId = ticketId)
         }
     }
+    private fun onttipoRemitenteChange(tipoRemitente: String) {
+        _uiState.update {
+            it.copy(tipoRemitente = tipoRemitente)
+        }
+    }
 }
 
 fun MensajeUiState.toEntity() = MensajeEntity(
@@ -142,7 +156,8 @@ fun MensajeUiState.toEntity() = MensajeEntity(
     fecha = fecha ?: Date(),
     contenido = contenido ?: "",
     remitente = remitente ?: "",
-    ticketId = ticketId,
+    tipoRemitente = tipoRemitente ?: "",
+    ticketId = ticketId
 
     )
 
