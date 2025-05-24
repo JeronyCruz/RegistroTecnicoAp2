@@ -1,13 +1,16 @@
 package edu.ucne.registrotecnico.presentation.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
@@ -18,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -29,106 +33,134 @@ import edu.ucne.registrotecnico.presentation.navigation.Screen
 fun HomeScreen(
     navController: NavController
 ) {
+    // Definición de colores personalizados
+    val primaryColor = Color(0xFF272D4D)
+    val secondaryColor = Color(0xFFB83564)
+    val accentColor = Color(0xFFFF6A5A)
+    val lightAccentColor = Color(0xFFFFB350)
+    val complementaryColor = Color(0xFF83B8AA)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color(0xFFF5F5F5))
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Top)
+        verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top)
     ) {
-        // Título
+        // Título mejorado
         Text(
-            text = "Home",
+            text = "Sistema de Registros ",
             style = MaterialTheme.typography.h4,
-            modifier = Modifier.padding(bottom = 16.dp),
-            fontWeight = FontWeight.Bold,
-            color = Color.Black
+            modifier = Modifier.padding(bottom = 8.dp),
+            fontWeight = FontWeight.ExtraBold,
+            color = primaryColor
         )
 
-        // Contenedor con sombra
+        Text(
+            text = "Gestión de Técnicos, Tickets y Prioridades",
+            style = MaterialTheme.typography.subtitle1,
+            color = secondaryColor.copy(alpha = 0.8f)
+        )
+
+        // Contenedor con diseño mejorado
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(elevation = 8.dp, shape = RoundedCornerShape(8.dp))
-                .clip(RoundedCornerShape(8.dp)),
-            color = MaterialTheme.colors.surface
+                .shadow(
+                    elevation = 12.dp,
+                    shape = RoundedCornerShape(16.dp),
+                    clip = false
+                )
+                .clip(RoundedCornerShape(16.dp)),
+            color = Color.White
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                modifier = Modifier.padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 // Botón 1 - Técnicos
-                OutlinedButton(
+                Button(
                     onClick = { navController.navigate(Screen.TecnicoList) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(60.dp)
-                        .border(
-                            width = 2.dp,
-                            color = Color.Blue,
-                            shape = RoundedCornerShape(8.dp)
-                        ),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        backgroundColor = Color.Transparent,
-                        contentColor = Color.Black
+                        .height(70.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = primaryColor,
+                        contentColor = Color.White
+                    ),
+                    elevation = ButtonDefaults.elevation(
+                        defaultElevation = 8.dp,
+                        pressedElevation = 4.dp
                     )
                 ) {
                     Text(
                         text = "Registro Técnico",
-                        fontSize = 18.sp,
-                        color = Color.Black
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
 
                 // Botón 2 - Prioridades
-                OutlinedButton(
+                Button(
                     onClick = { navController.navigate(Screen.PrioridadList) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(60.dp)
-                        .border(
-                            width = 2.dp,
-                            color = Color.Blue,
-                            shape = RoundedCornerShape(8.dp)
-                        ),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        backgroundColor = Color.Transparent,
-                        contentColor = Color.Black
+                        .height(70.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = secondaryColor,
+                        contentColor = Color.White
+                    ),
+                    elevation = ButtonDefaults.elevation(
+                        defaultElevation = 8.dp,
+                        pressedElevation = 4.dp
                     )
                 ) {
                     Text(
                         text = "Registro Prioridades",
-                        fontSize = 18.sp,
-                        color = Color.Black
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
 
                 // Botón 3 - Tickets
-                OutlinedButton(
+                Button(
                     onClick = { navController.navigate(Screen.TicketList) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(60.dp)
-                        .border(
-                            width = 2.dp,
-                            color = Color.Blue,
-                            shape = RoundedCornerShape(8.dp)
-                        ),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        backgroundColor = Color.Transparent,
-                        contentColor = Color.Black
+                        .height(70.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = accentColor,
+                        contentColor = Color.White
+                    ),
+                    elevation = ButtonDefaults.elevation(
+                        defaultElevation = 8.dp,
+                        pressedElevation = 4.dp
                     )
                 ) {
                     Text(
                         text = "Registro Tickets",
-                        fontSize = 18.sp,
-                        color = Color.Black
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
             }
         }
+
+        // Pie de página decorativo
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(4.dp)
+                .background(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(primaryColor, complementaryColor, lightAccentColor)
+                    ),
+                    shape = RoundedCornerShape(2.dp)
+                )
+        )
     }
 }
