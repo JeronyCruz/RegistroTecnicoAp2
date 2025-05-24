@@ -6,15 +6,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.registrotecnico.data.local.entities.TecnicoEntity
 import edu.ucne.registrotecnico.data.repository.TecnicosRepository
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
-class TecnicosViewModel(
+class TecnicosViewModel @Inject constructor(
     private val tecnicosRepository: TecnicosRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(TecnicoUiState())
@@ -26,12 +24,12 @@ class TecnicosViewModel(
 
     fun onEvent(event: TecnicoEvent) {
         when (event) {
-            TecnicoEvent.Delete -> TODO()
-            TecnicoEvent.New -> TODO()
-            is TecnicoEvent.NombreChange -> TODO()
-            TecnicoEvent.Save -> TODO()
-            is TecnicoEvent.SueldoChange -> TODO()
-            is TecnicoEvent.TecnicoChange -> TODO()
+            TecnicoEvent.Delete -> deleteTecnico()
+            TecnicoEvent.New -> nuevo()
+            is TecnicoEvent.NombreChange -> onNombreChange(event.nombre)
+            TecnicoEvent.Save -> saveTecnico()
+            is TecnicoEvent.SueldoChange -> onSueldoChange(event.sueldo)
+            is TecnicoEvent.TecnicoChange -> onTecnicoIdChange((event.tecnicoId))
         }
 
     }
@@ -72,46 +70,39 @@ class TecnicosViewModel(
         }
     }
 
-//    fun saveTecnico(tecnico: TecnicoEntity) {
-//        viewModelScope.launch {
-//            tecnicosRepository.save(tecnico)
-//        }
-//    }
 
     private fun saveTecnico() {
         viewModelScope.launch {
-            if (_uiState.value.nombre.isNullOrBlank() && _uiState.value.sueldo > 0) {
+            if (_uiState.value.nombre.isNullOrBlank() || _uiState.value.sueldo <= 0) {
                 _uiState.update {
-                    it.copy(errorMessage = "Campos vacios")
+                    it.copy(errorMessage = "El nombre no puede estar vacío y el sueldo debe ser mayor que 0")
                 }
             } else {
-                tecnicosRepository.save(_uiState.value.toEntity())
+                try {
+                    tecnicosRepository.save(_uiState.value.toEntity())
+                    // Limpiar el estado después de guardar
+                    _uiState.update {
+                        it.copy(
+                            tecnicoId = null,
+                            nombre = "",
+                            sueldo = 0.0,
+                            errorMessage = null
+                        )
+                    }
+                } catch (e: Exception) {
+                    _uiState.update {
+                        it.copy(errorMessage = "Error al guardar: ${e.message}")
+                    }
+                }
             }
         }
     }
-
-//    suspend fun findTecnico(id: Int): TecnicoEntity? {
-//        return tecnicosRepository.find(id)
-//    }
-
-//    fun deleteTecnico(tecnico: TecnicoEntity) {
-//        viewModelScope.launch {
-//            tecnicosRepository.delete(tecnico)
-//        }
-//    }
 
     private fun deleteTecnico() {
         viewModelScope.launch {
             tecnicosRepository.delete(_uiState.value.toEntity())
         }
     }
-
-//    val tecnicos: StateFlow<List<TecnicoEntity>> = tecnicosRepository.getAll()
-//        .stateIn(
-//            scope = viewModelScope,
-//            started = SharingStarted.WhileSubscribed(5000),
-//            initialValue = emptyList()
-//        )
 
     private fun onNombreChange(nombre: String) {
         _uiState.update {

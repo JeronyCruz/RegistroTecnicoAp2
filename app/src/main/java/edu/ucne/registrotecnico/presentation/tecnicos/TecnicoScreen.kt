@@ -36,7 +36,7 @@ import androidx.navigation.NavController
 fun TecnicoScreen(
     tecnicoId: Int? = null,
     viewModel: TecnicosViewModel = hiltViewModel(),
-    navController: NavController,
+//    navController: NavController,
     goBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -113,7 +113,9 @@ fun TecnicoBodyScreen(
             // Campo Sueldo
             OutlinedTextField(
                 value = uiState.sueldo.toString(),
-                onValueChange = { onEvent(TecnicoEvent.SueldoChange((it.toDoubleOrNull() ?: 0.0).toString())) },
+                onValueChange = {
+                    onEvent(TecnicoEvent.SueldoChange(it.toDoubleOrNull() ?: 0.0))
+                },
                 label = { Text("Sueldo ($)") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
@@ -149,7 +151,10 @@ fun TecnicoBodyScreen(
                 }
 
                 Button(
-                    onClick = { onEvent(TecnicoEvent.Save) },
+                    onClick = {
+                        onEvent(TecnicoEvent.Save)
+                        goBack()
+                    },
                     modifier = Modifier.weight(1f)
                 ) {
                     Icon(Icons.Default.Edit, contentDescription = "Guardar")
