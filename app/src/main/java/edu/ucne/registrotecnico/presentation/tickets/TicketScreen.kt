@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -34,19 +35,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
-import edu.ucne.registrotecnico.data.local.entities.PrioridadEntity
-import edu.ucne.registrotecnico.data.local.entities.TecnicoEntity
 
 
 @Composable
 fun TicketScreen(
     ticketId: Int? = null,
     viewModel: TicketsViewModel = hiltViewModel(),
-    navController: NavController,
+//    navController: NavController,
     goBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -73,6 +72,9 @@ fun TicketBodyScreen(
     onEvent: (TicketEvent) -> Unit,
     goBack: () -> Unit
 ) {
+    var expandedPrioridad by remember { mutableStateOf(false) }
+    var expandedTecnico by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -150,23 +152,91 @@ fun TicketBodyScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Selector de Prioridad
-                PrioridadDropdown(
-                    prioridadId = uiState.prioridadId,
-                    prioridades = uiState.prioridades,
-                    onPrioridadSelected = { id -> onEvent(TicketEvent.PrioridadIdChange(id)) },
-                    errorMessage = if (uiState.errorMessage != null && uiState.prioridadId == 0) "Seleccione una prioridad" else null
-                )
+                // Dropdown Prioridad
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedButton(
+                        onClick = { expandedPrioridad = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            uiState.prioridades.find { it.prioridadId == uiState.prioridadId }?.descripcion
+                                ?: "Seleccione prioridad",
+                            modifier = Modifier.weight(1f),
+                            textAlign = TextAlign.Start
+                        )
+                        Icon(Icons.Default.ArrowDropDown, contentDescription = "Prioridad")
+                    }
+                    DropdownMenu(
+                        expanded = expandedPrioridad,
+                        onDismissRequest = { expandedPrioridad = false },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        uiState.prioridades.forEach { prioridad ->
+                            DropdownMenuItem(
+                                text = { Text(prioridad.descripcion) },
+                                onClick = {
+                                    onEvent(
+                                        TicketEvent.PrioridadIdChange(
+                                            prioridad.prioridadId ?: 0
+                                        )
+                                    )
+                                    expandedPrioridad = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                if (uiState.errorMessage != null && uiState.prioridadId == 0) {
+                    Text(
+                        text = "Seleccione una prioridad",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Selector de Técnico
-                TecnicoDropdown(
-                    tecnicoId = uiState.tecnicoId,
-                    tecnicos = uiState.tecnicos,
-                    onTecnicoSelected = { id -> onEvent(TicketEvent.TecnicoIdChange(id)) },
-                    errorMessage = if (uiState.errorMessage != null && uiState.tecnicoId == 0) "Seleccione un técnico" else null
-                )
+                // Dropdown Técnico
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedButton(
+                        onClick = { expandedTecnico = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            uiState.tecnicos.find { it.tecnicoId == uiState.tecnicoId }?.nombre
+                                ?: "Seleccione técnico",
+                            modifier = Modifier.weight(1f),
+                            textAlign = TextAlign.Start
+                        )
+                        Icon(Icons.Default.ArrowDropDown, contentDescription = "Técnico")
+                    }
+                    DropdownMenu(
+                        expanded = expandedTecnico,
+                        onDismissRequest = { expandedTecnico = false },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        uiState.tecnicos.forEach { tecnico ->
+                            DropdownMenuItem(
+                                text = { Text(tecnico.nombre) },
+                                onClick = {
+                                    onEvent(TicketEvent.TecnicoIdChange(tecnico.tecnicoId ?: 0))
+                                    expandedTecnico = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                if (uiState.errorMessage != null && uiState.tecnicoId == 0) {
+                    Text(
+                        text = "Seleccione un técnico",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                    )
+                }
 
                 uiState.errorMessage?.let { message ->
                     Text(
@@ -197,7 +267,10 @@ fun TicketBodyScreen(
                     }
 
                     Button(
-                        onClick = { onEvent(TicketEvent.Save) },
+                        onClick = {
+                            onEvent(TicketEvent.Save)
+                            goBack()
+                        },
                         modifier = Modifier.weight(1f)
                     ) {
                         Icon(Icons.Default.Add, contentDescription = "Guardar")
@@ -210,103 +283,4 @@ fun TicketBodyScreen(
     }
 }
 
-@Composable
-private fun PrioridadDropdown(
-    prioridadId: Int,
-    prioridades: List<PrioridadEntity>,
-    onPrioridadSelected: (Int) -> Unit,
-    errorMessage: String?
-) {
-    var expanded by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxWidth()) {
-//        OutlinedTextField(
-//            value = prioridades.find { it.prioridadId == prioridadId }?.descripcion
-//                ?: "Seleccione prioridad",
-//            onValueChange = {},
-//            label = { Text("Prioridad") },
-//            modifier = Modifier.fillMaxWidth(),
-//            readOnly = true,
-//            trailingIcon = {
-//                Icon(Icons.Default.ArrowDropDown, contentDescription = "Prioridad")
-//            },
-//            isError = errorMessage != null,
-//            onClick = { expanded = true }
-//        )
-
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            prioridades.forEach { prioridad ->
-                DropdownMenuItem(
-                    text = { Text(prioridad.descripcion) },
-                    onClick = {
-                        onPrioridadSelected(prioridad.prioridadId ?: 0)
-                        expanded = false
-                    }
-                )
-            }
-        }
-    }
-
-    errorMessage?.let {
-        Text(
-            text = it,
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-        )
-    }
-}
-
-@Composable
-private fun TecnicoDropdown(
-    tecnicoId: Int,
-    tecnicos: List<TecnicoEntity>,
-    onTecnicoSelected: (Int) -> Unit,
-    errorMessage: String?
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box(modifier = Modifier.fillMaxWidth()) {
-//        OutlinedTextField(
-//            value = tecnicos.find { it.tecnicoId == tecnicoId }?.nombre ?: "Seleccione técnico",
-//            onValueChange = {},
-//            label = { Text("Técnico") },
-//            modifier = Modifier.fillMaxWidth(),
-//            readOnly = true,
-//            trailingIcon = {
-//                Icon(Icons.Default.ArrowDropDown, contentDescription = "Técnico")
-//            },
-//            isError = errorMessage != null,
-//            onClick = { expanded = true }
-//        )
-
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            tecnicos.forEach { tecnico ->
-                DropdownMenuItem(
-                    text = { Text(tecnico.nombre) },
-                    onClick = {
-                        onTecnicoSelected(tecnico.tecnicoId ?: 0)
-                        expanded = false
-                    }
-                )
-            }
-        }
-    }
-
-    errorMessage?.let {
-        Text(
-            text = it,
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-        )
-    }
-}

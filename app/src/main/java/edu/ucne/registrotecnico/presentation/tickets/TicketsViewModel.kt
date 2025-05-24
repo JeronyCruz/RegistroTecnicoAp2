@@ -2,25 +2,23 @@ package edu.ucne.registrotecnico.presentation.tickets
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import edu.ucne.registrotecnico.data.local.entities.TecnicoEntity
+import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.registrotecnico.data.local.entities.TicketEntity
 import edu.ucne.registrotecnico.data.repository.PrioridadesRepository
 import edu.ucne.registrotecnico.data.repository.TecnicosRepository
 import edu.ucne.registrotecnico.data.repository.TicketsRepository
-import edu.ucne.registrotecnico.presentation.tecnicos.TecnicoUiState
-import edu.ucne.registrotecnico.presentation.tecnicos.toEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Date
+import javax.inject.Inject
 
-class TicketsViewModel (
+@HiltViewModel
+class TicketsViewModel @Inject constructor(
     private val ticketsRepository: TicketsRepository,
     private val tecnicosRepository: TecnicosRepository,
     private val prioridadesRepository: PrioridadesRepository
@@ -80,6 +78,8 @@ class TicketsViewModel (
 
     init {
         getTickets()
+        getPrioridades()
+        getTecnicos()
     }
 
     private fun getTickets() {
@@ -87,6 +87,26 @@ class TicketsViewModel (
             ticketsRepository.getAll().collect { tickets ->
                 _uiState.update {
                     it.copy(tickets = tickets)
+                }
+            }
+        }
+    }
+
+    private fun getPrioridades() {
+        viewModelScope.launch {
+            prioridadesRepository.getAll().collect { prioridades ->
+                _uiState.update {
+                    it.copy(prioridades = prioridades)
+                }
+            }
+        }
+    }
+
+    private fun getTecnicos() {
+        viewModelScope.launch {
+            tecnicosRepository.getAll().collect { tecnicos ->
+                _uiState.update {
+                    it.copy(tecnicos = tecnicos)
                 }
             }
         }
@@ -119,7 +139,7 @@ class TicketsViewModel (
 
     private fun saveTicket() {
         viewModelScope.launch {
-            if (_uiState.value.cliente.isNullOrBlank() && _uiState.value.asunto.isNullOrBlank() && _uiState.value.descripcion.isNullOrBlank()) {
+            if (_uiState.value.cliente.isNullOrBlank() || _uiState.value.asunto.isNullOrBlank() || _uiState.value.descripcion.isNullOrBlank()) {
                 _uiState.update {
                     it.copy(errorMessage = "Campos vacios")
                 }
@@ -129,28 +149,11 @@ class TicketsViewModel (
         }
     }
 
-//    suspend fun findTecnico(id: Int): TecnicoEntity? {
-//        return tecnicosRepository.find(id)
-//    }
-
-//    fun deleteTecnico(tecnico: TecnicoEntity) {
-//        viewModelScope.launch {
-//            tecnicosRepository.delete(tecnico)
-//        }
-//    }
-
     private fun deleteTicket() {
         viewModelScope.launch {
             ticketsRepository.delete(_uiState.value.toEntity())
         }
     }
-
-//    val tecnicos: StateFlow<List<TecnicoEntity>> = tecnicosRepository.getAll()
-//        .stateIn(
-//            scope = viewModelScope,
-//            started = SharingStarted.WhileSubscribed(5000),
-//            initialValue = emptyList()
-//        )
 
     private fun onClienteChange(cliente: String) {
         _uiState.update {
@@ -193,36 +196,6 @@ class TicketsViewModel (
             it.copy(prioridadId = prioridadId)
         }
     }
-
-//    fun getAllTickets() {
-//        ticketsRepository.getAll()
-//            .onEach { tickets ->
-//                _tickets.value = tickets
-//            }
-//            .launchIn(viewModelScope)
-//    }
-//    fun saveTicket(ticket: TicketEntity) {
-//        viewModelScope.launch {
-//            ticketsRepository.save(ticket)
-//        }
-//    }
-//
-//    suspend fun findTicket(id: Int): TicketEntity? {
-//        return ticketsRepository.find(id)
-//    }
-//
-//    fun deleteTicket(ticket: TicketEntity) {
-//        viewModelScope.launch {
-//            ticketsRepository.delete(ticket)
-//        }
-//    }
-//
-//    val ticketsS: StateFlow<List<TicketEntity>> = ticketsRepository.getAll()
-//        .stateIn(
-//            scope = viewModelScope,
-//            started = SharingStarted.WhileSubscribed(5000),
-//            initialValue = emptyList()
-//        )
 }
 
 fun TicketUiState.toEntity() = TicketEntity(
