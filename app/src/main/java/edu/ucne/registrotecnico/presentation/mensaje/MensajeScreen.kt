@@ -88,12 +88,11 @@ fun MensajeBodyScreen(
     onBackClick: () -> Unit,
     onEvent: (MensajeEvent) -> Unit
 ) {
-    // Colores personalizados ajustados al diseño de la imagen
-    val primaryColor = Color(0xFF272D4D)   // Azul oscuro para barra superior
-    val secondaryColor = Color(0xFFB83564) // Color de acento (botón enviar)
-    val operatorColor = Color(0xFF4A89DC)  // Azul para mensajes del operador
-    val ownerColor = Color(0xFF48CFAD)     // Verde para mensajes del propietario
-    val backgroundColor = Color(0xFFF5F7FA) // Fondo gris claro
+    val primaryColor = Color(0xFF272D4D)
+    val secondaryColor = Color(0xFFB83564)
+    val operatorColor = Color(0xFF4A89DC)
+    val ownerColor = Color(0xFF48CFAD)
+    val backgroundColor = Color(0xFFF5F7FA)
 
     var remitente by remember { mutableStateOf("Operator") }
     val focusManager = LocalFocusManager.current
@@ -159,7 +158,7 @@ fun MensajeBodyScreen(
                 }
             }
 
-            // Área de respuesta (estilo similar a la imagen)
+
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -170,7 +169,7 @@ fun MensajeBodyScreen(
                 Column(
                     modifier = Modifier.padding(16.dp)
                 ) {
-                    // Encabezado "Reply as" como en la imagen
+
                     Text(
                         text = "Reply as:",
                         style = MaterialTheme.typography.labelMedium,
@@ -178,7 +177,7 @@ fun MensajeBodyScreen(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
-                    // Selector de remitente (alineado como en la imagen)
+                    // Selector de remitente
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Start,
@@ -255,7 +254,7 @@ fun MensajeBodyScreen(
 
                         Spacer(modifier = Modifier.width(8.dp))
 
-                        // Botón de enviar (destacado como en la imagen)
+
                         IconButton(
                             onClick = {
                                 onEvent(MensajeEvent.RemitenteChange(remitente))
@@ -299,7 +298,7 @@ fun MensajeItem(
             .padding(horizontal = 8.dp, vertical = 4.dp),
         horizontalAlignment = alignment
     ) {
-        // Encabezado del mensaje (estilo idéntico a la imagen)
+
         Text(
             text = "By ${mensaje.remitente} on ${mensaje.fecha.toFormattedDate()}",
             style = MaterialTheme.typography.labelSmall.copy(
@@ -309,7 +308,7 @@ fun MensajeItem(
             modifier = Modifier.padding(bottom = 4.dp, start = if (isOwner) 0.dp else 8.dp)
         )
 
-        // Burbuja de mensaje (estilo similar a la imagen)
+
         Box(
             modifier = Modifier
                 .widthIn(max = 300.dp)
@@ -329,7 +328,6 @@ fun MensajeItem(
     }
 }
 
-// Función de extensión para formato de fecha (igual que en la imagen)
 fun Date.toFormattedDate(): String {
     val format = SimpleDateFormat("dd/MM/yyyy (HH:mm)", Locale.getDefault())
     return format.format(this)
