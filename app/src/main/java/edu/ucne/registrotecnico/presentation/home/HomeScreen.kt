@@ -48,7 +48,6 @@ fun HomeScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top)
     ) {
-        // Título mejorado
         Text(
             text = "Sistema de Registros ",
             style = MaterialTheme.typography.h4,
@@ -63,7 +62,6 @@ fun HomeScreen(
             color = secondaryColor.copy(alpha = 0.8f)
         )
 
-        // Contenedor con diseño mejorado
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -150,7 +148,7 @@ fun HomeScreen(
             }
         }
 
-        // Pie de página decorativo
+        // Pie de página
         Box(
             modifier = Modifier
                 .fillMaxWidth()
