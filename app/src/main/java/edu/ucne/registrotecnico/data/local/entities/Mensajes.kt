@@ -21,5 +21,6 @@ data class MensajeEntity(
     val fecha: Date = Date(),
     val contenido: String = "",
     val remitente: String = "",
+    val tipoRemitente: String = "",
     val ticketId: Int
 )
