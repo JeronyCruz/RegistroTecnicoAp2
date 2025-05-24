@@ -55,19 +55,19 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
+import dagger.hilt.android.AndroidEntryPoint
 import edu.ucne.registrotecnico.data.local.entities.TecnicoEntity
 import edu.ucne.registrotecnico.data.repository.PrioridadesRepository
 import edu.ucne.registrotecnico.data.repository.TecnicosRepository
 import edu.ucne.registrotecnico.data.repository.TicketsRepository
 import edu.ucne.registrotecnico.presentation.navigation.HomeNavHost
-import edu.ucne.registrotecnico.presentation.navigation.PrioridadesNavHost
-import edu.ucne.registrotecnico.presentation.navigation.TecnicosNavHost
-import edu.ucne.registrotecnico.presentation.navigation.TicketsNavHost
 import edu.ucne.registrotecnico.presentation.prioridades.PrioridadesViewModel
 import edu.ucne.registrotecnico.presentation.tecnicos.TecnicosViewModel
 import edu.ucne.registrotecnico.presentation.tickets.TicketsViewModel
 import kotlinx.coroutines.launch
 
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private lateinit var tecnicoDb: TecnicoDb
     private lateinit var tecnicosRepository: TecnicosRepository
