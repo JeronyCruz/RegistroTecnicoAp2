@@ -1,7 +1,5 @@
 package edu.ucne.registrotecnico.presentation.prioridades
 
-import edu.ucne.registrotecnico.presentation.tecnicos.TecnicoEvent
-
 sealed interface PrioridadEvent {
     data class PrioridadChange(val prioridadId: Int): PrioridadEvent
     data class DescripcionChange(val descripcion:String): PrioridadEvent

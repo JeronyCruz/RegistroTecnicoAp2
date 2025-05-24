@@ -4,12 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.registrotecnico.data.local.entities.MensajeEntity
-import edu.ucne.registrotecnico.data.local.entities.PrioridadEntity
 import edu.ucne.registrotecnico.data.repository.MensajesRepository
-import edu.ucne.registrotecnico.data.repository.PrioridadesRepository
-import edu.ucne.registrotecnico.presentation.prioridades.PrioridadEvent
-import edu.ucne.registrotecnico.presentation.prioridades.PrioridadUiState
-import edu.ucne.registrotecnico.presentation.prioridades.toEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update

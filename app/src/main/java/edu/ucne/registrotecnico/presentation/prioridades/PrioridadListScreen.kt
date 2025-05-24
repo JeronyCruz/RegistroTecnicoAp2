@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.registrotecnico.data.local.entities.PrioridadEntity
-import edu.ucne.registrotecnico.ui.theme.RegistroTecnicoAp2Theme
 
 @Composable
 fun PrioridadListScreen(
