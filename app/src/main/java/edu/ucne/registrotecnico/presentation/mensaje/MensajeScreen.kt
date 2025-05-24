@@ -94,7 +94,6 @@ fun MensajeBodyScreen(
     val ownerColor = Color(0xFF48CFAD)
     val backgroundColor = Color(0xFFF5F7FA)
 
-    var remitente by remember { mutableStateOf("Operator") }
     val focusManager = LocalFocusManager.current
     val listState = rememberLazyListState()
 
@@ -139,7 +138,6 @@ fun MensajeBodyScreen(
                 .padding(padding)
                 .fillMaxSize()
         ) {
-            // Lista de mensajes
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
@@ -148,16 +146,16 @@ fun MensajeBodyScreen(
                 state = listState,
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(uiState.mensajes) { mensaje ->
+                // Ordenamos mensajes cronológicamente (más antiguos arriba)
+                items(uiState.mensajes.sortedByDescending { it.fecha }) { mensaje ->
                     MensajeItem(
                         mensaje = mensaje,
-                        isOwner = mensaje.remitente == "Owner",
+                        isOwner = mensaje.tipoRemitente == "Owner",
                         ownerColor = ownerColor,
                         operatorColor = operatorColor
                     )
                 }
             }
-
 
             Card(
                 modifier = Modifier
@@ -166,67 +164,48 @@ fun MensajeBodyScreen(
                 elevation = CardDefaults.cardElevation(4.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-
-                    Text(
-                        text = "Reply as:",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = Color.Gray,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-
-                    // Selector de remitente
+                Column(modifier = Modifier.padding(16.dp)) {
+                    // Radio buttons
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // Botón Operator
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(end = 16.dp)
-                        ) {
-                            RadioButton(
-                                selected = remitente == "Operator",
-                                onClick = { remitente = "Operator" },
-                                colors = RadioButtonDefaults.colors(
-                                    selectedColor = operatorColor,
-                                    unselectedColor = Color.Gray
-                                )
-                            )
-                            Text(
-                                text = "Operator",
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(start = 4.dp)
-                            )
-                        }
+                        RadioButton(
+                            selected = uiState.tipoRemitente == "Owner",
+                            onClick = { onEvent(MensajeEvent.tipoRemitenteChange("Owner")) },
+                            colors = RadioButtonDefaults.colors(selectedColor = ownerColor)
+                        )
+                        Text("Owner")
 
-                        // Botón Owner
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            RadioButton(
-                                selected = remitente == "Owner",
-                                onClick = { remitente = "Owner" },
-                                colors = RadioButtonDefaults.colors(
-                                    selectedColor = ownerColor,
-                                    unselectedColor = Color.Gray
-                                )
-                            )
-                            Text(
-                                text = "Owner",
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(start = 4.dp)
-                            )
-                        }
+                        RadioButton(
+                            selected = uiState.tipoRemitente == "Operator",
+                            onClick = { onEvent(MensajeEvent.tipoRemitenteChange("Operator")) },
+                            colors = RadioButtonDefaults.colors(selectedColor = operatorColor)
+                        )
+                        Text("Operator")
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Campo de mensaje y botón de enviar
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    // Nombre
+                    OutlinedTextField(
+                        value = uiState.remitente ?: "",
+                        onValueChange = { onEvent(MensajeEvent.RemitenteChange(it)) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp),
+                        label = { Text("Your name") },
+                        shape = RoundedCornerShape(8.dp),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            focusedBorderColor = primaryColor,
+                            unfocusedBorderColor = Color.LightGray,
+                            cursorColor = primaryColor
+                        ),
+                        singleLine = true
+                    )
+
+                    // Campo mensaje + botón
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         OutlinedTextField(
                             value = uiState.contenido ?: "",
                             onValueChange = { onEvent(MensajeEvent.ContenidoChange(it)) },
@@ -243,9 +222,10 @@ fun MensajeBodyScreen(
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
                             keyboardActions = KeyboardActions(
                                 onSend = {
-                                    onEvent(MensajeEvent.RemitenteChange(remitente))
-                                    onEvent(MensajeEvent.Save)
-                                    focusManager.clearFocus()
+                                    if (uiState.remitente?.isNotBlank() == true) {
+                                        onEvent(MensajeEvent.Save)
+                                        focusManager.clearFocus()
+                                    }
                                 }
                             ),
                             singleLine = false,
@@ -254,16 +234,17 @@ fun MensajeBodyScreen(
 
                         Spacer(modifier = Modifier.width(8.dp))
 
-
                         IconButton(
                             onClick = {
-                                onEvent(MensajeEvent.RemitenteChange(remitente))
-                                onEvent(MensajeEvent.Save)
-                                focusManager.clearFocus()
+                                if (uiState.remitente?.isNotBlank() == true) {
+                                    onEvent(MensajeEvent.Save)
+                                    focusManager.clearFocus()
+                                }
                             },
                             modifier = Modifier
                                 .size(48.dp)
-                                .background(secondaryColor, CircleShape)
+                                .background(secondaryColor, CircleShape),
+                            enabled = uiState.remitente?.isNotBlank() == true && uiState.contenido?.isNotBlank() == true
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Send,
@@ -286,11 +267,12 @@ fun MensajeItem(
     ownerColor: Color,
     operatorColor: Color
 ) {
-    val bubbleColor = if (isOwner) ownerColor else operatorColor
+    // Aquí definimos si el mensaje va a la izquierda o derecha según sea Owner u Operator
     val alignment = if (isOwner) Alignment.Start else Alignment.End
-    val bubbleBackground = if (isOwner) Color.White else bubbleColor
+    val bubbleColor = if (isOwner) ownerColor else operatorColor
+    val bubbleBackground = if (isOwner) bubbleColor.copy(alpha = 0.15f) else bubbleColor
     val textColor = if (isOwner) Color.Black else Color.White
-    val borderColor = if (isOwner) bubbleColor.copy(alpha = 0.3f) else Color.Transparent
+    val borderColor = if (isOwner) bubbleColor.copy(alpha = 0.4f) else Color.Transparent
 
     Column(
         modifier = Modifier
@@ -298,16 +280,14 @@ fun MensajeItem(
             .padding(horizontal = 8.dp, vertical = 4.dp),
         horizontalAlignment = alignment
     ) {
-
         Text(
-            text = "By ${mensaje.remitente} on ${mensaje.fecha.toFormattedDate()}",
+            text = "Por ${mensaje.remitente} (${mensaje.tipoRemitente}) - ${mensaje.fecha.toFormattedDate()}",
             style = MaterialTheme.typography.labelSmall.copy(
                 color = Color.Gray,
                 fontWeight = FontWeight.Normal
             ),
-            modifier = Modifier.padding(bottom = 4.dp, start = if (isOwner) 0.dp else 8.dp)
+            modifier = Modifier.padding(bottom = 4.dp)
         )
-
 
         Box(
             modifier = Modifier
@@ -333,22 +313,23 @@ fun Date.toFormattedDate(): String {
     return format.format(this)
 }
 
+
 @Preview(showBackground = true)
 @Composable
 private fun PreviewMensajeScreen() {
     val mensajes = listOf(
         MensajeEntity(
             mensajeId = 1,
-            contenido = "Thank you for reaching out to us. I'm Sandeep from the Web Admin team writing in response to ticket #077620. I understand your concern regarding the Grant permission issue and I'm happy to assist you with this.",
+            contenido = "Gracias por su Tiempo, le estaremos atendiendo pronto.",
             fecha = SimpleDateFormat("dd/MM/yyyy HH:mm").parse("01/06/2025 20:10")!!,
             remitente = "Operator",
             ticketId = 1
         ),
         MensajeEntity(
             mensajeId = 2,
-            contenido = "Hi,\nI hope you are having an excellent day!\nI create this ticket to ask for view definition permission for my new database",
+            contenido = "Muchas Gracias.",
             fecha = SimpleDateFormat("dd/MM/yyyy HH:mm").parse("01/06/2025 18:15")!!,
-            remitente = "Owner",
+            remitente = "John Doe",
             ticketId = 1
         )
     )
@@ -356,7 +337,8 @@ private fun PreviewMensajeScreen() {
     val mockUiState = MensajeUiState(
         mensajes = mensajes,
         ticketId = 77620,
-        contenido = ""
+        contenido = "",
+        remitente = "User Name"
     )
 
     MaterialTheme {
