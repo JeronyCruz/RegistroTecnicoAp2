@@ -138,11 +138,12 @@ fun MensajeBodyScreen(
                     .weight(1f)
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
+                reverseLayout = true,
                 state = listState,
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Ordenamos mensajes cronológicamente (más antiguos arriba)
-                items(uiState.mensajes.sortedByDescending { it.fecha }) { mensaje ->
+
+                items(uiState.mensajes) { mensaje ->
                     MensajeItem(
                         mensaje = mensaje,
                         isOwner = mensaje.tipoRemitente == "Owner",
@@ -264,10 +265,9 @@ fun MensajeItem(
 ) {
     // Aquí definimos si el mensaje va a la izquierda o derecha según sea Owner u Operator
     val alignment = if (isOwner) Alignment.Start else Alignment.End
-    val bubbleColor = if (isOwner) ownerColor else operatorColor
-    val bubbleBackground = if (isOwner) bubbleColor.copy(alpha = 0.15f) else bubbleColor
+    val backgroundColor = if (isOwner) ownerColor.copy(alpha = 0.15f) else operatorColor
     val textColor = if (isOwner) Color.Black else Color.White
-    val borderColor = if (isOwner) bubbleColor.copy(alpha = 0.4f) else Color.Transparent
+    val borderColor = if (isOwner) ownerColor.copy(alpha = 0.4f) else Color.Transparent
 
     Column(
         modifier = Modifier
@@ -288,7 +288,7 @@ fun MensajeItem(
             modifier = Modifier
                 .widthIn(max = 300.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(bubbleBackground)
+                .background(backgroundColor)
                 .border(1.dp, borderColor, RoundedCornerShape(12.dp))
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
