@@ -189,28 +189,42 @@ fun TicketCard(
                 .padding(16.dp)
         ) {
             // ID del ticket
-            Text(
-                text = "Ticket #${ticket.ticketId}",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.Gray
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ){
+                Text(
+                    text = "Ticket #${ticket.ticketId}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                // Fecha
+                Text(
+                    text = "${SimpleDateFormat("yyyy-MM-dd ", Locale.getDefault()).format(ticket.fecha)}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Black
+                )
+
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Asunto
+            // Cliente
             Text(
-                text = ticket.asunto ?: "Sin asunto",
-                style = MaterialTheme.typography.titleMedium.copy(
+                text = "Cliente: ${ticket.cliente ?: "Sin Cliente"}",
+                style = MaterialTheme.typography.bodySmall.copy(
                     fontWeight = FontWeight.SemiBold
                 ),
                 modifier = Modifier.padding(bottom = 4.dp)
             )
 
-            // Fecha
+            // Asunto
             Text(
-                text = ticket.fecha.toFormattedString(),
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.Gray
+                text = ticket.asunto ?: "Sin asunto",
+                style = MaterialTheme.typography.bodySmall.copy(
+//                    fontWeight = FontWeight.SemiBold
+                ),
+                modifier = Modifier.padding(bottom = 4.dp)
             )
 
             Spacer(modifier = Modifier.height(12.dp))
