@@ -27,7 +27,7 @@ class TecnicosViewModel @Inject constructor(
             TecnicoEvent.Delete -> deleteTecnico()
             TecnicoEvent.New -> nuevo()
             is TecnicoEvent.NombreChange -> onNombreChange(event.nombre)
-            TecnicoEvent.Save -> saveTecnico()
+            TecnicoEvent.Save -> viewModelScope.launch { saveTecnico() }
             is TecnicoEvent.SueldoChange -> onSueldoChange(event.sueldo)
             is TecnicoEvent.TecnicoChange -> onTecnicoIdChange((event.tecnicoId))
         }
@@ -71,29 +71,25 @@ class TecnicosViewModel @Inject constructor(
     }
 
 
-    private fun saveTecnico() {
-        viewModelScope.launch {
-            if (_uiState.value.nombre.isNullOrBlank() || _uiState.value.sueldo <= 0) {
+    suspend fun saveTecnico(): Boolean {
+        return if (_uiState.value.nombre.isNullOrBlank() || _uiState.value.sueldo <= 0) {
+            _uiState.update { it.copy(errorMessage = "Campos Vacios o Invalidos") }
+            false
+        } else {
+            try {
+                tecnicosRepository.save(_uiState.value.toEntity())
                 _uiState.update {
-                    it.copy(errorMessage = "El nombre no puede estar vacío y el sueldo debe ser mayor que 0")
+                    it.copy(
+                        tecnicoId = null,
+                        nombre = "",
+                        sueldo = 0.0,
+                        errorMessage = null
+                    )
                 }
-            } else {
-                try {
-                    tecnicosRepository.save(_uiState.value.toEntity())
-                    // Limpiar el estado después de guardar
-                    _uiState.update {
-                        it.copy(
-                            tecnicoId = null,
-                            nombre = "",
-                            sueldo = 0.0,
-                            errorMessage = null
-                        )
-                    }
-                } catch (e: Exception) {
-                    _uiState.update {
-                        it.copy(errorMessage = "Error al guardar: ${e.message}")
-                    }
-                }
+                true
+            } catch (e: Exception) {
+                _uiState.update { it.copy(errorMessage = "Error al guardar: ${e.message}") }
+                false
             }
         }
     }

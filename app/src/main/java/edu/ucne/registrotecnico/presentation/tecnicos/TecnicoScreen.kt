@@ -26,10 +26,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
 
 @Composable
 fun TecnicoScreen(
@@ -51,7 +53,8 @@ fun TecnicoScreen(
     TecnicoBodyScreen(
         uiState = uiState,
         onEvent = viewModel::onEvent,
-        goBack = goBack
+        goBack = goBack,
+        viewModel = viewModel
     )
 }
 
@@ -60,8 +63,10 @@ fun TecnicoScreen(
 fun TecnicoBodyScreen(
     uiState: TecnicoUiState,
     onEvent: (TecnicoEvent) -> Unit,
-    goBack: () -> Unit
+    goBack: () -> Unit,
+    viewModel: TecnicosViewModel
 ) {
+    val scope = rememberCoroutineScope()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -87,7 +92,7 @@ fun TecnicoBodyScreen(
         ) {
             // Campo ID (solo lectura)
             OutlinedTextField(
-                value = uiState.tecnicoId?.toString() ?: "Nuevo",
+                value = uiState.tecnicoId?.toString() ?: "0",
                 onValueChange = {},
                 label = { Text("ID Técnico") },
                 modifier = Modifier.fillMaxWidth(),
@@ -151,8 +156,12 @@ fun TecnicoBodyScreen(
 
                 Button(
                     onClick = {
-                        onEvent(TecnicoEvent.Save)
-                        goBack()
+                        scope.launch {
+                            val result = viewModel.saveTecnico()
+                            if (result) {
+                                goBack()
+                            }
+                        }
                     },
                     modifier = Modifier.weight(1f)
                 ) {
