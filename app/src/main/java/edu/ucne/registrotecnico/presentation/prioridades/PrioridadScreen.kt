@@ -26,10 +26,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
 
 @Composable
 fun PrioridadScreen(
@@ -51,7 +53,8 @@ fun PrioridadScreen(
     PrioridadBodyScreen(
         uiState = uiState,
         onEvent = viewModel::onEvent,
-        goBack = goBack
+        goBack = goBack,
+        viewModel = viewModel
     )
 }
 
@@ -60,8 +63,10 @@ fun PrioridadScreen(
 fun PrioridadBodyScreen(
     uiState: PrioridadUiState,
     onEvent: (PrioridadEvent) -> Unit,
-    goBack: () -> Unit
+    goBack: () -> Unit,
+    viewModel: PrioridadesViewModel
 ) {
+    val scope = rememberCoroutineScope()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -87,7 +92,7 @@ fun PrioridadBodyScreen(
         ) {
             // Campo ID (solo lectura)
             OutlinedTextField(
-                value = uiState.prioridadId?.toString() ?: "Nuevo",
+                value = uiState.prioridadId?.toString() ?: "0",
                 onValueChange = {},
                 label = { Text("ID Prioridad") },
                 modifier = Modifier.fillMaxWidth(),
@@ -137,8 +142,12 @@ fun PrioridadBodyScreen(
 
                 Button(
                     onClick = {
-                        onEvent(PrioridadEvent.Save)
-                        goBack()
+                        scope.launch {
+                            val result = viewModel.savePrioridad()
+                            if (result){
+                                goBack()
+                            }
+                        }
                     },
                     modifier = Modifier.weight(1f)
                 ) {

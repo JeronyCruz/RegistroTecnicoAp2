@@ -14,7 +14,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PrioridadesViewModel @Inject constructor(
     private val prioridadRepository: PrioridadesRepository
-): ViewModel() {
+) : ViewModel() {
     private val _uiState = MutableStateFlow(PrioridadUiState())
     val uiState = _uiState.asStateFlow()
 
@@ -22,13 +22,13 @@ class PrioridadesViewModel @Inject constructor(
         getPrioridades()
     }
 
-    fun  onEvent(event: PrioridadEvent){
-        when(event){
+    fun onEvent(event: PrioridadEvent) {
+        when (event) {
             PrioridadEvent.Delete -> deletePrioridad()
             is PrioridadEvent.DescripcionChange -> onDescripcionChange(event.descripcion)
             PrioridadEvent.New -> nuevo()
             is PrioridadEvent.PrioridadChange -> onPrioridadIdChange(event.prioridadId)
-            PrioridadEvent.Save -> savePrioridad()
+            PrioridadEvent.Save -> viewModelScope.launch { savePrioridad() }
         }
     }
 
@@ -66,15 +66,15 @@ class PrioridadesViewModel @Inject constructor(
         }
     }
 
-    private fun savePrioridad() {
-        viewModelScope.launch {
-            if (_uiState.value.descripcion.isNullOrBlank()) {
-                _uiState.update {
-                    it.copy(errorMessage = "Campos vacios")
-                }
-            } else {
-                prioridadRepository.save(_uiState.value.toEntity())
+    suspend fun savePrioridad(): Boolean {
+        return if (_uiState.value.descripcion.isNullOrBlank()) {
+            _uiState.update {
+                it.copy(errorMessage = "Campos vacios o Invalidos")
             }
+            false
+        } else {
+            prioridadRepository.save(_uiState.value.toEntity())
+            true
         }
     }
 
