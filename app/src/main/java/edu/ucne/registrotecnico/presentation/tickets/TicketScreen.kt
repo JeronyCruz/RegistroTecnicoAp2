@@ -33,12 +33,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -61,7 +63,8 @@ fun TicketScreen(
     TicketBodyScreen(
         uiState = uiState,
         onEvent = viewModel::onEvent,
-        goBack = goBack
+        goBack = goBack,
+        viewModel = viewModel
     )
 }
 
@@ -70,8 +73,10 @@ fun TicketScreen(
 fun TicketBodyScreen(
     uiState: TicketUiState,
     onEvent: (TicketEvent) -> Unit,
-    goBack: () -> Unit
+    goBack: () -> Unit,
+    viewModel: TicketsViewModel
 ) {
+    val scope = rememberCoroutineScope()
     var expandedPrioridad by remember { mutableStateOf(false) }
     var expandedTecnico by remember { mutableStateOf(false) }
 
@@ -104,7 +109,7 @@ fun TicketBodyScreen(
             ) {
                 // Campo ID (solo lectura)
                 OutlinedTextField(
-                    value = uiState.ticketId?.toString() ?: "Nuevo",
+                    value = uiState.ticketId?.toString() ?: "0",
                     onValueChange = {},
                     label = { Text("ID Ticket") },
                     modifier = Modifier.fillMaxWidth(),
@@ -268,8 +273,12 @@ fun TicketBodyScreen(
 
                     Button(
                         onClick = {
-                            onEvent(TicketEvent.Save)
-                            goBack()
+                            scope.launch {
+                                val result = viewModel.saveTicket()
+                                if (result) {
+                                    goBack()
+                                }
+                            }
                         },
                         modifier = Modifier.weight(1f)
                     ) {

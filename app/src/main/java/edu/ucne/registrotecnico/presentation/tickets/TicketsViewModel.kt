@@ -40,7 +40,7 @@ class TicketsViewModel @Inject constructor(
             is TicketEvent.PrioridadIdChange -> onPrioridadIdChange(event.prioridadId)
             is TicketEvent.TecnicoIdChange -> onTecnicoIdChange(event.tecnicoId)
             is TicketEvent.TicketChange -> onTicketIdChange(event.ticketId)
-            TicketEvent.Save -> saveTicket()
+            TicketEvent.Save -> viewModelScope.launch { saveTicket() }
             TicketEvent.New -> nuevo()
             TicketEvent.Delete -> deleteTicket()
         }
@@ -137,16 +137,21 @@ class TicketsViewModel @Inject constructor(
 //        }
 //    }
 
-    private fun saveTicket() {
-        viewModelScope.launch {
-            if (_uiState.value.cliente.isNullOrBlank() || _uiState.value.asunto.isNullOrBlank() || _uiState.value.descripcion.isNullOrBlank()) {
+    suspend fun saveTicket(): Boolean {
+            return if (_uiState.value.cliente.isNullOrBlank()
+                || _uiState.value.asunto.isNullOrBlank()
+                || _uiState.value.descripcion.isNullOrBlank()||
+                uiState.value.tecnicoId <= 0 ||
+                uiState.value.prioridadId <= 0  ) {
                 _uiState.update {
-                    it.copy(errorMessage = "Campos vacios")
+                    it.copy(errorMessage = "Campos vacios o Invalidos")
                 }
+                false
             } else {
                 ticketsRepository.save(_uiState.value.toEntity())
+                true
             }
-        }
+
     }
 
     private fun deleteTicket() {
