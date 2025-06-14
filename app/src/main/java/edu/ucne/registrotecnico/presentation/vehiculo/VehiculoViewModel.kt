@@ -35,11 +35,11 @@ class VehiculoViewModel @Inject constructor(
         when (event) {
             is VehiculoEvent.DescripcionChange -> DescripcionChange(event.descripcion)
             VehiculoEvent.GetVehiculo -> getVehiculo()
-            VehiculoEvent.LimpiarErrorMessageDescripcion ->LimpiarErrorMessageDescripcion()
+            VehiculoEvent.LimpiarErrorMessageDescripcion -> LimpiarErrorMessageDescripcion()
             is VehiculoEvent.Nuevo -> Nuevo()
             VehiculoEvent.PostVehiculo -> addVehiculo()
             is VehiculoEvent.PrecioChange -> PrecioChange(event.precio)
-            is VehiculoEvent.VehiculoChange ->VehiculoChange(event.vehiculoId)
+            is VehiculoEvent.VehiculoChange -> VehiculoChange(event.vehiculoId)
             VehiculoEvent.LimpiarErrorMessagePrecio -> LimpiarErrorMessagePrecio()
         }
     }
@@ -65,8 +65,8 @@ class VehiculoViewModel @Inject constructor(
             getVehiculo()
             Nuevo()
             _uiEvent.send(UiEvent.NavigateUp)
-            }
         }
+    }
 
     private fun LimpiarErrorMessageDescripcion() {
         viewModelScope.launch {
@@ -149,10 +149,6 @@ class VehiculoViewModel @Inject constructor(
                             )
                         }
                     }
-
-//                    is Resource.Error<*> -> TODO()
-//                    is Resource.Loading<*> -> TODO()
-//                    is Resource.Success<*> -> TODO()
                 }
             }
         }
