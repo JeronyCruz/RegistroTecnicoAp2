@@ -11,5 +11,7 @@ data class VehiculoUiState(
     val errorPrecio: String? = null,
     val isSuccess: Boolean = false,
     val isLoading: Boolean = false,
-    val vehiculos: List<VehiculoDto> = emptyList()
+    val vehiculos: List<VehiculoDto> = emptyList(),
+    val showSuccessMessage: Boolean = false,
+    val successMessage: String = ""
 )
