@@ -143,6 +143,29 @@ fun HomeScreen(
                         fontWeight = FontWeight.SemiBold
                     )
                 }
+
+                // Botón 4 - Vehiculos
+                Button(
+                    onClick = { navController.navigate(Screen.VehiculoList) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(70.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = lightAccentColor,
+                        contentColor = primaryColor
+                    ),
+                    elevation = ButtonDefaults.elevation(
+                        defaultElevation = 8.dp,
+                        pressedElevation = 4.dp
+                    )
+                ) {
+                    Text(
+                        text = "API Vehiculos",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
         }
 
