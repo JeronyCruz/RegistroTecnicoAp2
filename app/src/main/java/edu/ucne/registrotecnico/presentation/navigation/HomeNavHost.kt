@@ -13,6 +13,8 @@ import edu.ucne.registrotecnico.presentation.tecnicos.TecnicoListScreen
 import edu.ucne.registrotecnico.presentation.tecnicos.TecnicoScreen
 import edu.ucne.registrotecnico.presentation.tickets.TicketListScreen
 import edu.ucne.registrotecnico.presentation.tickets.TicketScreen
+import edu.ucne.registrotecnico.presentation.vehiculo.VehiculoListScreen
+import edu.ucne.registrotecnico.presentation.vehiculo.VehiculoScreen
 
 @Composable
 fun HomeNavHost(
@@ -97,6 +99,26 @@ fun HomeNavHost(
             MensajeScreen(
                 ticketId = ticketId,
                 onBackClick = { navHostController.popBackStack() }
+            )
+        }
+
+        // Pantallas de Vehiculos
+        composable<Screen.VehiculoList> {
+            VehiculoListScreen(
+                goToVehiculo = { id ->
+                    navHostController.navigate(Screen.Vehiculo(id))
+                },
+                createVehiculo = {
+                    navHostController.navigate(Screen.Vehiculo(null))
+                }
+            )
+        }
+
+        composable<Screen.Vehiculo> { backStack ->
+            val vehiculoId = backStack.toRoute<Screen.Vehiculo>().vehiculoId
+            VehiculoScreen(
+                vehiculoId = vehiculoId ?: 0,
+                goBack = { navHostController.popBackStack() }
             )
         }
     }
