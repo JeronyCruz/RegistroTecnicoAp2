@@ -10,4 +10,5 @@ sealed interface VehiculoEvent {
     data object Nuevo: VehiculoEvent
     data object LimpiarErrorMessageDescripcion: VehiculoEvent
     data object LimpiarErrorMessagePrecio: VehiculoEvent
+    object ResetSuccessMessage : VehiculoEvent
 }
