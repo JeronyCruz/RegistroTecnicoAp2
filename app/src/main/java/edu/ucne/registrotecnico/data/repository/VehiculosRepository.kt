@@ -11,16 +11,19 @@ import javax.inject.Inject
 class VehiculosRepository @Inject constructor(
     private val remoteDataSource: RemoteDataSource
 ) {
-    fun getVehiculo(idVehiculo: Int): Flow<Resource<List<VehiculoDto>>> = flow {
-        try{
-            emit(Resource.Loading())
-            val vehiculo = remoteDataSource.getVehiculo(idVehiculo)
-
-            emit(Resource.Success(vehiculo))
-        } catch (e: HttpException){
-            emit(Resource.Error("Error de internet: ${e.message()}"))
-        } catch (e: Exception){
-            emit(Resource.Error("Error desconocido: ${e.message}"))
+     fun getVehiculo(id: Int): Flow<Resource<VehiculoDto>> {
+        return flow {
+            try {
+                emit(Resource.Loading())
+                val vehiculos = remoteDataSource.getVehiculo(id)
+                if (vehiculos.isNotEmpty()) {
+                    emit(Resource.Success(vehiculos.first()))
+                } else {
+                    emit(Resource.Error("No se encontró el vehículo"))
+                }
+            } catch (e: Exception) {
+                emit(Resource.Error("Error: ${e.localizedMessage ?: "Error desconocido"}"))
+            }
         }
     }
 
