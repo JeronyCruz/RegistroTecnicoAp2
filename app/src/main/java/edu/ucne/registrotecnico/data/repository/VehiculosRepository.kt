@@ -1,5 +1,7 @@
 package edu.ucne.registrotecnico.data.repository
 
+import edu.ucne.registrotecnico.data.local.dao.VehiculoDao
+import edu.ucne.registrotecnico.data.local.entities.VehiculoEntity
 import edu.ucne.registrotecnico.data.remote.RemoteDataSource
 import edu.ucne.registrotecnico.data.remote.Resource
 import edu.ucne.registrotecnico.data.remote.dto.VehiculoDto
@@ -9,7 +11,8 @@ import retrofit2.HttpException
 import javax.inject.Inject
 
 class VehiculosRepository @Inject constructor(
-    private val remoteDataSource: RemoteDataSource
+    private val remoteDataSource: RemoteDataSource,
+    private val vehiculosDao: VehiculoDao
 ) {
      fun getVehiculo(id: Int): Flow<Resource<VehiculoDto>> {
         return flow {
@@ -28,17 +31,41 @@ class VehiculosRepository @Inject constructor(
     }
 
     fun getVehiculos(): Flow<Resource<List<VehiculoDto>>> = flow {
+        var listVehiculosDto: List<VehiculoEntity> = emptyList()
         try {
             emit(Resource.Loading())
             val vehiculos = remoteDataSource.getVehiculos()
-            emit(Resource.Success(vehiculos))
+            val vehiculosEntity = vehiculos.map {
+                it.toEntity()
+            }
+            vehiculosDao.save(vehiculosEntity)
+//            emit(Resource.Success(vehiculos))
         } catch (e: HttpException) {
             val errorMessage = e.response()?.errorBody()?.string() ?: e.message()
             emit(Resource.Error("Error de conexion $errorMessage"))
         } catch (e: Exception) {
-            emit(Resource.Error("Error ${e.message}"))
+            //emit(Resource.Error("Error ${e.message}"))
         }
+        listVehiculosDto = vehiculosDao.getAll()
+        val listaVehiculoDto = listVehiculosDto.map {
+            it.toDto()
+        }
+
+        emit(Resource.Success(listaVehiculoDto))
     }
+
+    private fun VehiculoDto.toEntity() = VehiculoEntity(
+        vehiculoId = this.vehiculoId,
+        descripcion = this.descripcion ?: "",
+        precio = this.precio ?: 0.0
+    )
+
+    private fun VehiculoEntity.toDto() = VehiculoDto(
+        vehiculoId = this.vehiculoId,
+        descripcion = this.descripcion ?: "",
+        precio = this.precio ?: 0.0
+    )
+
 
     suspend fun saveVehiculo(vehiculoDto: VehiculoDto) = remoteDataSource.saveVehiculo(vehiculoDto)
 
@@ -46,3 +73,4 @@ class VehiculosRepository @Inject constructor(
 
     suspend fun deleteVehiculo(idVehiculo: Int) = remoteDataSource.deleteVehiculo(idVehiculo)
 }
+
