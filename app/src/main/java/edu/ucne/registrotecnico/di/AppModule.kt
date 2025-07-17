@@ -32,6 +32,9 @@ object AppModule {
     fun provideTicketDao(tecnicoDb: TecnicoDb) = tecnicoDb.TicketDao()
     @Provides
     fun provideMensajeDao(tecnicoDb: TecnicoDb) = tecnicoDb.MensajeDao()
+    @Provides
+    fun provideVehiculoDao(tecnicoDb: TecnicoDb) = tecnicoDb.VehiculoDao()
+
 
 
 }
