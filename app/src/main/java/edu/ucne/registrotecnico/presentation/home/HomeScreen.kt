@@ -166,6 +166,29 @@ fun HomeScreen(
                         fontWeight = FontWeight.SemiBold
                     )
                 }
+
+                // Botón 5 - Usuarios
+                Button(
+                    onClick = { navController.navigate(Screen.UsuarioList) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(70.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = primaryColor,
+                        contentColor = Color.White
+                    ),
+                    elevation = ButtonDefaults.elevation(
+                        defaultElevation = 8.dp,
+                        pressedElevation = 4.dp
+                    )
+                ) {
+                    Text(
+                        text = "API Usuarios",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
         }
 
