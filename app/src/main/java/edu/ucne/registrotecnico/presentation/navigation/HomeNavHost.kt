@@ -13,6 +13,8 @@ import edu.ucne.registrotecnico.presentation.tecnicos.TecnicoListScreen
 import edu.ucne.registrotecnico.presentation.tecnicos.TecnicoScreen
 import edu.ucne.registrotecnico.presentation.tickets.TicketListScreen
 import edu.ucne.registrotecnico.presentation.tickets.TicketScreen
+import edu.ucne.registrotecnico.presentation.usuarios.UsuarioListScreen
+import edu.ucne.registrotecnico.presentation.usuarios.UsuarioScreen
 import edu.ucne.registrotecnico.presentation.vehiculo.VehiculoListScreen
 import edu.ucne.registrotecnico.presentation.vehiculo.VehiculoScreen
 
@@ -121,5 +123,25 @@ fun HomeNavHost(
                 goBack = { navHostController.popBackStack() }
             )
         }
+
+        // Pantallas de Listar Usuarios
+        composable<Screen.UsuarioList> {
+            UsuarioListScreen (
+                goToUsuario = { id ->
+                    navHostController.navigate(Screen.Usuario(id))
+                },
+                createUsuario = {
+                    navHostController.navigate(Screen.Usuario(null))
+                },
+                goBack = { navHostController.popBackStack() }
+            )
+        }
+
+        //pantalla formulario de usuarios
+        composable <Screen.Usuario>{ backStack ->
+            UsuarioScreen(
+                goBack = { navHostController.popBackStack() }
+                )
+            }
     }
 }
