@@ -1,5 +1,6 @@
 package edu.ucne.registrotecnico.data.remote
 
+import edu.ucne.registrotecnico.data.remote.dto.UsuarioDto
 import edu.ucne.registrotecnico.data.remote.dto.VehiculoDto
 import retrofit2.Response
 import retrofit2.http.Body
@@ -24,4 +25,19 @@ interface VehiculoinApi {
 
     @DELETE("api/Vehiculos/{id}")
     suspend fun deleteVehiculo(@Path("id") id: Int): Response<Unit>
+
+    @GET("api/Usuarios")
+    suspend fun getUsuarios(): List<UsuarioDto>
+
+    @GET("api/Usuarios/{id}")
+    suspend fun getUsuario(@Path("id") id: Int): List<UsuarioDto>
+
+    @PUT("api/Usuarios/{id}")
+    suspend fun updateUsuario(@Body usuarioDto: UsuarioDto): UsuarioDto
+
+    @POST("api/Usuarios")
+    suspend fun saveUsuario(@Body usuarioDto: UsuarioDto): UsuarioDto
+
+    @DELETE("api/Usuarios/{id}")
+    suspend fun deleteUsuario(@Path("id") id: Int): Response<Unit>
 }
